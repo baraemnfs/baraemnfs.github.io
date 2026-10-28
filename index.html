@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>صفحة المعلم — مركز البراعم</title>
+<style>body{margin:0;background:#f4f8f8;font-family:Tahoma,Arial,sans-serif;color:#1b4d5c}#m{text-align:center;margin-top:38vh;font-size:16px;line-height:1.9}#m a{color:#2e7d8c}</style>
+</head>
+<body>
+<div id="m">جارٍ تحميل صفحة المعلم…</div>
+<script>
+// هذه الصفحة ثابتة ولا تحتاج تعديلًا أبدًا: تجلب صفحة المعلم كاملة من Apps Script دون أي حساب Google.
+var API = 'https://script.google.com/macros/s/AKfycbwVRJuchV8FGt_BRcCIJjmh4TwzE74CHZ-OYwH9Bml-yEMfEaJbPqxMDDNOygqTuF3BeA/exec';
+function failed() {
+  document.getElementById('m').innerHTML = 'تعذّر تحميل الصفحة. تأكد من الإنترنت ثم <a href="" onclick="location.reload();return false">أعد المحاولة</a>.';
+}
+function load(tries) {
+  fetch(API, {method: 'POST', credentials: 'omit', redirect: 'follow',
+    headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({fn: 'webPage', args: []})})
+    .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+    .then(function (res) {
+      if (!res || !res.ok || typeof res.v !== 'string') throw new Error('bad');
+      document.open(); document.write(res.v); document.close();
+    })
+    .catch(function () { if (tries > 0) setTimeout(function () { load(tries - 1); }, 1500); else failed(); });
+}
+load(2);
+</script>
+</body>
+</html>
