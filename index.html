@@ -131,32 +131,39 @@ footer.save .st.err{color:var(--warn);font-weight:600}
 var S = {boot:null, teacher:'', pin:'', month:'', sup:false, view:'login', home:null,
          cls:'', data:null, tab:'grades', subject:'', si:0, quick:0, group:0, item:0,
          acad:{}, edu:{}, det:{}, orig:{acad:{}, edu:{}, det:{}}, open:{}, dirty:false,
-         vinit:null, v:null, vItem:0};
+         vinit:null, v:null, vItem:0, homes:{}, classes:{}};
 var app = document.getElementById('app');
 var NOTES = [{key:'أبرز ما تحسّن', label:'أبرز ما تحسّن'}, {key:'ما يحتاج متابعة', label:'ما يحتاج متابعة'}];
 var LEAVE = 'لديك تغييرات غير محفوظة. هل تريد المتابعة دون حفظ؟';
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-function load(on){document.getElementById('loading').classList.toggle('on',!!on);}
+var busy=0;
+function load(on){ busy=Math.max(0,busy+(on?1:-1)); document.getElementById('loading').classList.toggle('on',busy>0); }
 var API_URL='https://script.google.com/macros/s/AKfycbwVRJuchV8FGt_BRcCIJjmh4TwzE74CHZ-OYwH9Bml-yEMfEaJbPqxMDDNOygqTuF3BeA/exec';
 var IS_APP='yes'==='yes';  // true only in the installable app on GitHub Pages
-function call(fn,args,ok,onFail){
-  load(true);
-  function fail(m){ load(false); if(onFail){ onFail(m); return; } status('err', m || 'حدث خطأ، حاول مرة أخرى'); }
+function call(fn,args,ok,onFail,quiet){
+  var shown=!quiet; if(shown) load(true);
+  function done(){ if(shown){ shown=false; load(false); } }
+  function fail(m){ done(); if(onFail){ onFail(m); return; } status('err', m || 'حدث خطأ، حاول مرة أخرى'); }
   function viaScriptRun(){
     if(!(window.google && google.script && google.script.run)){ fail('تعذّر الاتصال بالخادم. تأكد من الإنترنت ثم أعد المحاولة.'); return; }
-    var r = google.script.run.withSuccessHandler(function(x){load(false);ok(x);})
+    var r = google.script.run.withSuccessHandler(function(x){done();ok(x);})
       .withFailureHandler(function(e){ fail(e && e.message); });
     r[fn].apply(r,args);
   }
   if(API_URL.indexOf('https://')!==0 || !window.fetch){ viaScriptRun(); return; }
   fetch(API_URL,{method:'POST',credentials:'omit',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn:fn,args:args})})
     .then(function(r){ if(!r.ok) throw new Error('http'); return r.json(); })
-    .then(function(res){ if(res && res.ok){ load(false); ok(res.v); } else fail(res && res.err); })
+    .then(function(res){ if(res && res.ok){ done(); ok(res.v); } else fail(res && res.err); })
     .catch(function(){ viaScriptRun(); });
 }
 function store(k,v){try{ if(v===undefined) return localStorage.getItem(k); if(v===null) localStorage.removeItem(k); else localStorage.setItem(k,v);}catch(e){return null;}}
-function forget(){ store('albaraem_pin',null); S.pin=''; }
+function forget(){ store('albaraem_pin',null); store('albaraem_home',null); S.pin=''; S.homes={}; S.classes={}; }
+function jget(k){ try{ return JSON.parse(store(k)||'null'); }catch(e){ return null; } }
+function jput(k,v){ try{ store(k,JSON.stringify(v)); }catch(e){} }
+var MONTH_BY_INDEX=['كانون الثاني','شباط','آذار','نيسان','أيار','حزيران','تموز','آب','أيلول','تشرين الأول','تشرين الثاني','كانون الأول'];
+function thisMonth(months){ var m=MONTH_BY_INDEX[new Date().getMonth()]; return months.indexOf(m)>=0 ? m : months[0]; }
+function hkey(){ return S.teacher+'|'+S.month; }
 function status(kind,msg){var st=document.getElementById('st'); st.className='st '+(kind||''); st.textContent=msg; if(kind==='err') document.getElementById('savebar').style.display='block';}
 function setDirty(d){S.dirty=d; document.getElementById('saveBtn').disabled=!d; status(d?'dirty':'', d?'تغييرات غير محفوظة':'لا توجد تغييرات');}
 function leave(fn){ if(S.dirty && !confirm(LEAVE)) return; setDirty(false); fn(); }
@@ -167,19 +174,26 @@ window.addEventListener('beforeunload',function(e){ if(S.dirty){e.preventDefault
 // ---------------------------------------------------------------- login
 function start(){
   function cantLoad(){ load(false); app.innerHTML='<div class="card"><h2>تعذّر تحميل الصفحة</h2><div class="hint" style="margin-top:0">تأكد من اتصال الإنترنت ثم أعد المحاولة.'+(IS_APP?'':' إذا كنت مسجّلًا بأكثر من حساب Google في هذا المتصفح، افتح الرابط في نافذة خاصة (Incognito) أو من الجوال.')+'</div><button class="btn block" onclick="location.reload()">إعادة المحاولة</button></div>'; }
-  setTimeout(function(){ if(!S.boot) cantLoad(); }, 15000);
-  call('webBootstrap',[],function(b){
-    S.boot=b; S.month=b.currentMonth||b.months[0]; S.teacher=store('albaraem_teacher')||'';
-    var savedPin=store('albaraem_pin');
-    var known=b.teachers.some(function(x){return x.name===S.teacher;});
-    if(S.teacher && known && savedPin!==null){
-      S.pin=savedPin;
-      call('webLogin',[S.teacher,S.pin],function(r){ S.sup=!!(r&&r.supervisor); goHome(); }, function(m){
-        if(/غير صحيح|غير موجود/.test(m||'')){ forget(); renderLogin(); return; }
-        app.innerHTML='<div class="card"><h2>تعذّر الاتصال</h2><div class="hint" style="margin-top:0">'+esc(m||'تأكد من اتصال الإنترنت ثم أعد المحاولة.')+'</div><button class="btn block" onclick="location.reload()">إعادة المحاولة</button></div>';
-      });
-    } else renderLogin();
-  }, cantLoad);
+  setTimeout(function(){ if(!S.boot && !S.home) cantLoad(); }, 15000);
+  var cached=jget('albaraem_boot'), savedPin=store('albaraem_pin');
+  S.teacher=store('albaraem_teacher')||'';
+  function known(b){ return b && b.teachers.some(function(x){return x.name===S.teacher;}); }
+  function gotBoot(b){ S.boot=b; jput('albaraem_boot',b); }
+  if(S.teacher && savedPin!==null && known(cached)){
+    // remembered login: show the last home page at once, then refresh boot + home together (one round trip)
+    S.boot=cached; S.pin=savedPin; S.month=thisMonth(cached.months);
+    var last=jget('albaraem_home');
+    if(last && last.key===hkey()){ S.homes[hkey()]=last.h; S.home=last.h; S.sup=!!last.h.supervisor; renderHome(); }
+    call('webBootstrap',[],gotBoot,function(){},true);
+    homeFetch(!S.home, function(m){
+      if(/غير صحيح|غير موجود/.test(m||'')){ forget(); renderLogin(); return; }
+      if(S.home) return;   // keep showing the cached page
+      app.innerHTML='<div class="card"><h2>تعذّر الاتصال</h2><div class="hint" style="margin-top:0">'+esc(m||'تأكد من اتصال الإنترنت ثم أعد المحاولة.')+'</div><button class="btn block" onclick="location.reload()">إعادة المحاولة</button></div>';
+    });
+    return;
+  }
+  if(cached){ S.boot=cached; S.month=thisMonth(cached.months); renderLogin(); call('webBootstrap',[],function(b){ gotBoot(b); if(S.view==='login' && JSON.stringify(b.teachers)!==JSON.stringify(cached.teachers)) renderLogin(); },function(){},true); return; }
+  call('webBootstrap',[],function(b){ gotBoot(b); S.month=thisMonth(b.months); renderLogin(); }, cantLoad);
 }
 function renderLogin(){
   S.view='login';
@@ -204,7 +218,7 @@ function renderLogin(){
     if(!tSel.value){tSel.focus();return;}
     S.teacher=tSel.value; S.month=document.getElementById('mSel').value;
     var p=document.getElementById('pin'); S.pin=p?p.value.trim():'';
-    call('webLogin',[S.teacher,S.pin],function(r){ S.sup=!!(r&&r.supervisor); store('albaraem_teacher',S.teacher); store('albaraem_pin',S.pin); goHome(); });
+    call('webHome',[S.teacher,S.pin,S.month],function(h){ store('albaraem_teacher',S.teacher); store('albaraem_pin',S.pin); gotHome(h); renderHome(); });
   };
 }
 function who(){
@@ -215,7 +229,21 @@ function who(){
 }
 
 // ---------------------------------------------------------------- home: my evaluations + visits
-function goHome(){ call('webHome',[S.teacher,S.pin,S.month],function(h){ S.home=h; S.sup=!!h.supervisor; renderHome(); }); }
+function gotHome(h){ S.home=h; S.sup=!!h.supervisor; S.homes[hkey()]=h; jput('albaraem_home',{key:hkey(),h:h}); }
+function homeFetch(loud,onFail){
+  var k=hkey();
+  call('webHome',[S.teacher,S.pin,S.month],function(h){
+    var changed=JSON.stringify(h)!==JSON.stringify(S.homes[k]);
+    gotHome(h);
+    // redraw only while the teacher is looking at the home page (or still waiting for it) — never over a class or a visit
+    if(S.pin && hkey()===k && (S.view==='login' || (S.view==='home' && changed))) renderHome();
+  }, onFail, !loud);
+}
+function goHome(){
+  var c=S.homes[hkey()];
+  if(c){ S.home=c; S.sup=!!c.supervisor; renderHome(); homeFetch(false,function(){}); }
+  else homeFetch(true);
+}
 function renderHome(){
   S.view='home'; who();
   document.getElementById('savebar').style.display='none';
@@ -276,13 +304,16 @@ function bindInstall(){
 
 // ---------------------------------------------------------------- monthly class evaluation
 function openClass(c){
-  call('webLoadClass',[S.teacher,S.pin,S.month,c],function(d){
+  var ck=hkey()+'|'+c;
+  function show(d){
     S.cls=c; S.data=d; S.acad=clone(d.acad); S.edu=clone(d.edu); S.det=clone(d.det);
     S.orig={acad:clone(d.acad),edu:clone(d.edu),det:clone(d.det)}; S.open={};
     S.subject=d.subjects[0]||''; S.si=0; S.quick=0; S.group=0; S.item=0;
     if(S.tab!=='grades'&&S.tab!=='quick'&&S.tab!=='edu') S.tab='grades';
     S.view='class'; setDirty(false); render();
-  });
+  }
+  if(S.classes[ck]){ show(S.classes[ck]); return; }   // only this teacher writes these rows, so the session copy stays right
+  call('webLoadClass',[S.teacher,S.pin,S.month,c],function(d){ S.classes[ck]=d; show(d); });
 }
 function hasPrev(){ var o=S.orig; return Object.keys(o.acad).length||Object.keys(o.edu).length||Object.keys(o.det).length; }
 
@@ -484,6 +515,11 @@ function saveClass(){
   if(!Object.keys(p.acad).length && !Object.keys(p.edu).length && !Object.keys(p.det).length){ setDirty(false); return; }
   call('webSave',[p],function(r){
     S.orig={acad:clone(S.acad),edu:clone(S.edu),det:clone(S.det)}; S.dirty=false;
+    var ck=hkey()+'|'+S.cls; if(S.classes[ck]){ S.classes[ck].acad=clone(S.acad); S.classes[ck].edu=clone(S.edu); S.classes[ck].det=clone(S.det); }
+    var h=S.homes[hkey()]; if(h && !h.classes.some(function(x){return x.cls===S.cls;})){
+      h.classes.push({cls:S.cls, n:r.students, parts:[Object.keys(S.acad).length>0, Object.keys(S.edu).length>0, Object.keys(S.det).length>0]});
+      var order=S.boot.classes; h.classes.sort(function(a,b){return order.indexOf(a.cls)-order.indexOf(b.cls);});
+    }
     document.getElementById('saveBtn').disabled=true;
     status('ok','تم الحفظ ✓ ('+r.students+' طالبًا) — يمكنك التعديل والحفظ مرة أخرى');
   });
@@ -567,7 +603,7 @@ function bindVisit(){
   var f=document.getElementById('vfill'); if(f) f.onclick=function(){ var k=keyOf(); st.forEach(function(name){ if(vval(name,k)==='') vput(name,k,4); }); keep(renderVisit); };
   var del=document.getElementById('vDel'); if(del) del.onclick=function(){
     if(!confirm('حذف هذه الزيارة نهائيًا مع تقييمات طلابها؟')) return;
-    call('webDeleteVisit',[S.teacher,S.pin,v.id],function(){ setDirty(false); goHome(); });
+    call('webDeleteVisit',[S.teacher,S.pin,v.id],function(){ setDirty(false); delete S.homes[hkey()]; goHome(); });
   };
 }
 function saveVisit(){
@@ -576,7 +612,7 @@ function saveVisit(){
   if(!v.cls||!v.subject||!v.teacher){ status('err','اختر الصف والمادة والمعلم/ة.'); return; }
   var p={sup:S.teacher,pin:S.pin,id:v.id,date:v.date,cls:v.cls,subject:v.subject,teacher:v.teacher,lesson:v.lesson,items:v.items,texts:v.texts,students:v.students};
   call('webSaveVisit',[p],function(r){
-    v.id=r.id; S.dirty=false; document.getElementById('saveBtn').disabled=true;
+    v.id=r.id; S.dirty=false; document.getElementById('saveBtn').disabled=true; delete S.homes[hkey()];
     status('ok','حُفظت الزيارة ✓ ('+r.students+' طالبًا'+(r.index!==''?'، مؤشر المعلم '+r.index:'')+')'+(r.counted?'':' — التاريخ خارج أشهر المتابعة فلم يدخل في مؤشرات الطلاب'));
     keep(renderVisit);
   });
