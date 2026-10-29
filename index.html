@@ -323,7 +323,7 @@ function attCard(){
   if(early) h+='<label class="f"><span class="warn">غادرت قبل موعدك بـ '+(mins(t.expTo)-mins(r.out))+' دقيقة</span> — سبب المغادرة المبكرة</label><textarea class="why" id="wEarly" placeholder="اكتب السبب">'+esc(r.earlyR||'')+'</textarea>';
   if(t.type==='إضافي' && r.inn) h+='<label class="f">المهام التي أنجزتها في هذا الدوام الإضافي</label><textarea class="why" id="wTasks" placeholder="مثال: تجهيز الحفل، تصحيح…">'+esc(r.tasks||'')+'</textarea>';
   if(late||early||(t.type==='إضافي'&&r.inn)) h+='<button class="btn sm" id="wSave" style="margin-top:8px">حفظ</button>';
-  if(x.editable) h+='<div class="hint"><a href="#" id="attLog">سجل دوامي هذا الشهر وتعديله</a> — إن نسيت التسجيل في يوم، أضفه أو عدّله من هنا.</div>';
+  if(x.editable) h+='<div class="hint"><a href="#" id="attLog">سجل دوامي: تعبئة الأيام السابقة وتعديلها</a> — إن نسيت التسجيل في يوم، أضفه أو عدّله من هنا.</div>';
   return h+'</div>';
 }
 function bindAtt(){
@@ -341,24 +341,52 @@ function toast(m){ var st=document.getElementById('st'), bar=document.getElement
   clearTimeout(toast.t); toast.t=setTimeout(function(){ if(S.view==='home'){ bar.style.display='none'; } document.getElementById('saveBtn').style.display=''; },2500); }
 function renderAttLog(){
   S.view='attlog'; who(); document.getElementById('savebar').style.display='none';
-  var x=S.att, h='<div class="card"><h2>سجل دوامي هذا الشهر<span class="grow"></span><button class="fill" id="back">رجوع</button></h2>'+
-    '<div class="hint" style="margin-top:0">عدّل وقت الوصول أو المغادرة لأي يوم ثم اضغط «حفظ» في سطره. اترك الوقتين فارغين لحذف يوم سُجّل بالخطأ.</div></div>';
+  var x=S.att, h='<div class="card"><h2>سجل دوامي<span class="grow"></span><button class="fill" id="back">رجوع</button></h2>'+
+    '<div class="hint" style="margin-top:0">اكتب وقت وصولك ومغادرتك لكل يوم داومت فيه، ثم اضغط «حفظ» في سطره. إن تأخرت أو غادرت قبل موعدك تظهر خانة السبب. '+
+    'اترك الوقتين فارغين لحذف يوم سُجّل بالخطأ. الأيام بلا تسجيل تُحسب غيابًا.</div></div>';
   if(!x||!x.days){ app.innerHTML=h+'<div class="card empty">التعديل غير متاح الآن.</div>'; document.getElementById('back').onclick=function(){ goHome(); }; return; }
+  var lastM='';
   h+='<div class="list" style="margin-top:14px">';
   x.days.forEach(function(d,i){
-    var r=d.rec||{};
-    h+='<div class="row'+(r.inn?' done':'')+'"><div class="nm"><b>'+esc(d.day)+' '+esc(d.date.slice(8)+'/'+(+d.date.slice(5,7)))+(d.type==='إضافي'?' · إضافي':'')+'</b><small>'+
-      (d.holiday?'عطلة':(d.expFrom?'المعتمد '+esc(d.expFrom)+' – '+esc(d.expTo):'ليس من أيام دوامك'))+'</small></div>'+
+    var r=d.rec||{}, m=d.date.slice(0,7);
+    if(m!==lastM){ lastM=m; h+='<div class="row" style="background:var(--soft)"><b style="color:var(--brand)">شهر '+(+m.slice(5))+'/'+m.slice(0,4)+'</b></div>'; }
+    h+='<div class="row'+(r.inn?' done':'')+'" data-day="'+i+'"><div class="nm"><b>'+esc(d.day)+' '+esc(+d.date.slice(8)+'/'+(+d.date.slice(5,7)))+(d.type==='إضافي'?' · إضافي':'')+'</b><small>'+
+      (d.holiday?'عطلة':(d.expFrom?'المعتمد '+esc(d.expFrom)+' – '+esc(d.expTo):'دوام إضافي'))+'</small></div>'+
       '<input class="tin" type="time" data-ai="'+i+'" value="'+esc(r.inn||'')+'"><input class="tin" type="time" data-ao="'+i+'" value="'+esc(r.out||'')+'">'+
-      '<button class="btn sm" data-as="'+i+'">حفظ</button></div>';
+      '<button class="btn sm" data-as="'+i+'">حفظ</button><div class="noteRow" id="why'+i+'" style="flex-direction:column;gap:4px"></div></div>';
   });
-  app.innerHTML=h+'</div><div class="legend">الوقت الأول: الوصول · الوقت الثاني: المغادرة</div>';
+  h+='</div><div class="legend">الوقت الأول: الوصول · الوقت الثاني: المغادرة</div>';
+  h+='<div class="card"><h2>إضافة يوم دوام إضافي</h2><div class="hint" style="margin-top:0">ليوم ليس من أيام دوامك المعتمدة (مثل الثلاثاء).</div>'+
+    '<div class="grid2"><div><label class="f">التاريخ</label><input type="date" id="xDate" min="'+esc(x.from||'')+'" max="'+esc(x.today.date)+'"></div>'+
+    '<div><label class="f">من – إلى</label><div style="display:flex;gap:6px"><input class="tin" type="time" id="xIn"><input class="tin" type="time" id="xOut"></div></div></div>'+
+    '<label class="f">المهام التي أنجزتها</label><textarea class="why" id="xTasks"></textarea><button class="btn block" id="xSave">حفظ اليوم الإضافي</button></div>';
+  app.innerHTML=h;
+  function whyBox(i){
+    var d=x.days[i], r=d.rec||{}, box=document.getElementById('why'+i), inn=app.querySelector('[data-ai="'+i+'"]').value, out=app.querySelector('[data-ao="'+i+'"]').value, t='';
+    var late=d.expFrom&&inn&&mins(inn)>mins(d.expFrom), early=d.expTo&&out&&mins(out)<mins(d.expTo);
+    if(late) t+='<textarea class="why" data-wl="'+i+'" placeholder="سبب التأخير ('+(mins(inn)-mins(d.expFrom))+' دقيقة)">'+esc(r.lateR||'')+'</textarea>';
+    if(early) t+='<textarea class="why" data-we="'+i+'" placeholder="سبب المغادرة المبكرة ('+(mins(d.expTo)-mins(out))+' دقيقة)">'+esc(r.earlyR||'')+'</textarea>';
+    if(d.type==='إضافي'&&inn) t+='<textarea class="why" data-wt="'+i+'" placeholder="المهام">'+esc(r.tasks||'')+'</textarea>';
+    var keep={}; box.querySelectorAll('textarea').forEach(function(a){ keep[a.getAttribute('data-wl')?'l':a.getAttribute('data-we')?'e':'t']=a.value; });
+    box.innerHTML=t;
+    box.querySelectorAll('textarea').forEach(function(a){ var k=a.getAttribute('data-wl')?'l':a.getAttribute('data-we')?'e':'t'; if(keep[k]!==undefined) a.value=keep[k]; });
+  }
+  x.days.forEach(function(d,i){ whyBox(i); });
+  app.querySelectorAll('[data-ai],[data-ao]').forEach(function(inp){ inp.onchange=function(){ whyBox(+(inp.getAttribute('data-ai')||inp.getAttribute('data-ao'))); }; });
   document.getElementById('back').onclick=function(){ goHome(); };
+  function saved(y){ S.att=y; S.attAt=Date.now(); var sy=window.scrollY; renderAttLog(); window.scrollTo(0,sy); status('ok','حُفظ ✓'); document.getElementById('savebar').style.display='block'; document.getElementById('saveBtn').style.display='none'; }
   app.querySelectorAll('[data-as]').forEach(function(b){ b.onclick=function(){
-    var i=+b.getAttribute('data-as'), d=x.days[i];
-    var p={date:d.date,type:d.type,inn:app.querySelector('[data-ai="'+i+'"]').value,out:app.querySelector('[data-ao="'+i+'"]').value};
-    call('webAttSave',[S.teacher,S.pin,p],function(y){ S.att=y; S.attAt=Date.now(); renderAttLog(); status('ok','حُفظ ✓'); document.getElementById('savebar').style.display='block'; document.getElementById('saveBtn').style.display='none'; });
+    var i=+b.getAttribute('data-as'), d=x.days[i], q=function(sel){ var e=app.querySelector(sel); return e?e.value:undefined; };
+    var p={date:d.date,type:d.type,inn:q('[data-ai="'+i+'"]'),out:q('[data-ao="'+i+'"]')};
+    var l=q('[data-wl="'+i+'"]'), e=q('[data-we="'+i+'"]'), t=q('[data-wt="'+i+'"]');
+    if(l!==undefined) p.lateR=l; if(e!==undefined) p.earlyR=e; if(t!==undefined) p.tasks=t;
+    call('webAttSave',[S.teacher,S.pin,p],saved);
   }; });
+  document.getElementById('xSave').onclick=function(){
+    var p={date:document.getElementById('xDate').value,type:'إضافي',inn:document.getElementById('xIn').value,out:document.getElementById('xOut').value,tasks:document.getElementById('xTasks').value};
+    if(!p.date||!p.inn){ status('err','اختر التاريخ ووقت الوصول.'); return; }
+    call('webAttSave',[S.teacher,S.pin,p],saved);
+  };
 }
 
 // ---------------------------------------------------------------- role pages: tasks (أ. جعفر), قرة أعين (أ. هناء), Telegram (أ. نور عربيات)
