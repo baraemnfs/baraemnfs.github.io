@@ -101,6 +101,28 @@ footer.save .st.err{color:var(--warn);font-weight:600}
 .loading.on{display:flex}
 .hint{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.7}
 .install{border-color:#e6d5ad;background:#fffbf2}
+.att .big{display:flex;gap:10px;margin-top:12px}
+.att .big .btn{flex:1;padding:14px 10px;font-size:16px}
+.att .times{display:flex;gap:10px;margin-top:10px}
+.att .times div{flex:1;background:var(--soft);border-radius:10px;padding:8px 10px;text-align:center}
+.att .times b{display:block;font-size:20px;color:var(--brand)}
+.att .times small{color:var(--muted);font-size:12px}
+.att textarea,.why{width:100%;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;margin-top:6px;background:#fff}
+.warn{color:var(--warn);font-weight:600}
+.okc{color:var(--ok);font-weight:600}
+.roles{display:flex;flex-wrap:wrap;gap:8px}
+.tri{min-width:62px;border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 8px;cursor:pointer;font-size:12.5px;line-height:1.4}
+.tri small{display:block;color:var(--muted);font-size:11px}
+.tri.yes{background:var(--r5);border-color:#6fb67c}
+.tri.no{background:var(--r1);border-color:#e08f8f}
+.opts{display:flex;gap:4px;flex-wrap:wrap}
+.opts button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 8px;font-size:12.5px;cursor:pointer}
+.opts button.on.s0{background:var(--r5);border-color:#6fb67c}
+.opts button.on.s1{background:var(--r3);border-color:#dfc66a}
+.opts button.on.s2{background:var(--r1);border-color:#e08f8f}
+.opts button.on.s3{background:#e5e9ea;border-color:#b9c3c5}
+.tin{width:96px;padding:7px 6px;border:1px solid var(--line);border-radius:8px;background:#fff;text-align:center}
+.dimrow{opacity:.6}
 .install h2{color:var(--gold)}
 .mrow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .mrow select{width:auto;flex:1;max-width:220px;padding:8px 10px}
@@ -131,7 +153,7 @@ footer.save .st.err{color:var(--warn);font-weight:600}
 var S = {boot:null, teacher:'', pin:'', month:'', sup:false, view:'login', home:null,
          cls:'', data:null, tab:'grades', subject:'', si:0, quick:0, group:0, item:0,
          acad:{}, edu:{}, det:{}, orig:{acad:{}, edu:{}, det:{}}, open:{}, dirty:false,
-         vinit:null, v:null, vItem:0, homes:{}, classes:{}};
+         vinit:null, v:null, vItem:0, homes:{}, classes:{}, att:null, tk:null, tg:null};
 var app = document.getElementById('app');
 var NOTES = [{key:'أبرز ما تحسّن', label:'أبرز ما تحسّن'}, {key:'ما يحتاج متابعة', label:'ما يحتاج متابعة'}];
 var LEAVE = 'لديك تغييرات غير محفوظة. هل تريد المتابعة دون حفظ؟';
@@ -158,11 +180,10 @@ function call(fn,args,ok,onFail,quiet){
     .catch(function(){ viaScriptRun(); });
 }
 function store(k,v){try{ if(v===undefined) return localStorage.getItem(k); if(v===null) localStorage.removeItem(k); else localStorage.setItem(k,v);}catch(e){return null;}}
-function forget(){ store('albaraem_pin',null); store('albaraem_home',null); S.pin=''; S.homes={}; S.classes={}; }
+function forget(){ store('albaraem_pin',null); store('albaraem_home',null); S.pin=''; S.homes={}; S.classes={}; S.att=null; }
 function jget(k){ try{ return JSON.parse(store(k)||'null'); }catch(e){ return null; } }
 function jput(k,v){ try{ store(k,JSON.stringify(v)); }catch(e){} }
-var MONTH_BY_INDEX=['كانون الثاني','شباط','آذار','نيسان','أيار','حزيران','تموز','آب','أيلول','تشرين الأول','تشرين الثاني','كانون الأول'];
-function thisMonth(months){ var m=MONTH_BY_INDEX[new Date().getMonth()]; return months.indexOf(m)>=0 ? m : months[0]; }
+function thisMonth(months,fallback){ var d=new Date(), m=(d.getMonth()+1)+'/'+d.getFullYear(); return months.indexOf(m)>=0 ? m : (fallback && months.indexOf(fallback)>=0 ? fallback : months[0]); }
 function hkey(){ return S.teacher+'|'+S.month; }
 function status(kind,msg){var st=document.getElementById('st'); st.className='st '+(kind||''); st.textContent=msg; if(kind==='err') document.getElementById('savebar').style.display='block';}
 function setDirty(d){S.dirty=d; document.getElementById('saveBtn').disabled=!d; status(d?'dirty':'', d?'تغييرات غير محفوظة':'لا توجد تغييرات');}
@@ -181,7 +202,7 @@ function start(){
   function gotBoot(b){ S.boot=b; jput('albaraem_boot',b); }
   if(S.teacher && savedPin!==null && known(cached)){
     // remembered login: show the last home page at once, then refresh boot + home together (one round trip)
-    S.boot=cached; S.pin=savedPin; S.month=thisMonth(cached.months);
+    S.boot=cached; S.pin=savedPin; S.month=thisMonth(cached.months,cached.currentMonth);
     var last=jget('albaraem_home');
     if(last && last.key===hkey()){ S.homes[hkey()]=last.h; S.home=last.h; S.sup=!!last.h.supervisor; renderHome(); }
     call('webBootstrap',[],gotBoot,function(){},true);
@@ -192,8 +213,8 @@ function start(){
     });
     return;
   }
-  if(cached){ S.boot=cached; S.month=thisMonth(cached.months); renderLogin(); call('webBootstrap',[],function(b){ gotBoot(b); if(S.view==='login' && JSON.stringify(b.teachers)!==JSON.stringify(cached.teachers)) renderLogin(); },function(){},true); return; }
-  call('webBootstrap',[],function(b){ gotBoot(b); S.month=thisMonth(b.months); renderLogin(); }, cantLoad);
+  if(cached){ S.boot=cached; S.month=thisMonth(cached.months,cached.currentMonth); renderLogin(); call('webBootstrap',[],function(b){ gotBoot(b); if(S.view==='login' && JSON.stringify(b.teachers)!==JSON.stringify(cached.teachers)) renderLogin(); },function(){},true); return; }
+  call('webBootstrap',[],function(b){ gotBoot(b); S.month=thisMonth(b.months,b.currentMonth); renderLogin(); }, cantLoad);
 }
 function renderLogin(){
   S.view='login';
@@ -247,7 +268,7 @@ function goHome(){
 function renderHome(){
   S.view='home'; who();
   document.getElementById('savebar').style.display='none';
-  var h=S.home, done={}, html=installCard()+'<div class="card"><h2>تقييماتي الشهرية</h2>'+
+  var h=S.home, done={}, html=installCard()+attCard()+rolesCard()+'<div class="card"><h2>تقييماتي الشهرية</h2>'+
     '<div class="mrow"><span>الشهر</span><select id="hMonth">'+S.boot.months.map(function(m){return '<option'+(m===S.month?' selected':'')+'>'+esc(m)+'</option>';}).join('')+'</select></div>';
   if(h.classes.length){
     html+='<div class="list">';
@@ -280,7 +301,132 @@ function renderHome(){
   app.querySelectorAll('[data-visit]').forEach(function(b){ b.onclick=function(){ openVisit(b.getAttribute('data-visit')); }; });
   var nv=document.getElementById('newV'); if(nv) nv.onclick=function(){ openVisit(''); };
   document.getElementById('hMonth').onchange=function(){ S.month=this.value; goHome(); };
-  bindInstall();
+  bindInstall(); bindAtt(); bindRoles();
+  var a=S.home.adm; if(a && a.att && a.started && !S.attBusy && (!S.att || Date.now()-(S.attAt||0)>60000)) attFetch();
+}
+
+// ---------------------------------------------------------------- daily attendance (every teacher in the follow-up)
+function attFetch(){ S.attBusy=true; call('webAttInit',[S.teacher,S.pin],function(x){ S.att=x; S.attAt=Date.now(); S.attBusy=false; if(S.view==='home') keep(renderHome); else if(S.view==='attlog') renderAttLog(); },function(){ S.attBusy=false; },true); }
+function mins(t){ var m=String(t||'').match(/^(\d{1,2}):(\d{2})/); return m? (+m[1])*60+(+m[2]) : null; }
+function attCard(){
+  var a=S.home&&S.home.adm; if(!a||!a.att) return '';
+  if(!a.started) return '<div class="card att"><h2>دوامي اليوم</h2><div class="hint" style="margin-top:0">يبدأ تسجيل الدوام من التطبيق في '+esc(a.start)+'.</div></div>';
+  var x=S.att; if(!x) return '<div class="card att"><h2>دوامي اليوم</h2><div class="hint" style="margin-top:0">جارٍ التحميل…</div></div>';
+  var t=x.today, r=t.rec||{}, h='<div class="card att"><h2>دوامي اليوم<span class="grow"></span><span class="badge">'+esc(t.day)+' '+esc(t.date.slice(8)+'/'+(+t.date.slice(5,7)))+'</span></h2>';
+  if(t.holiday) h+='<div class="hint" style="margin-top:0">اليوم عطلة رسمية. إن داومت يُسجَّل دوامًا إضافيًا.</div>';
+  else if(t.type==='عادي') h+='<div class="hint" style="margin-top:0">دوامك المعتمد اليوم: <b>'+esc(t.expFrom)+' – '+esc(t.expTo)+'</b></div>';
+  else h+='<div class="hint" style="margin-top:0">اليوم ليس من أيام دوامك المعتمدة؛ يُسجَّل <b>دوامًا إضافيًا</b>.</div>';
+  h+='<div class="times"><div><small>الوصول</small><b>'+esc(r.inn||'—')+'</b></div><div><small>المغادرة</small><b>'+esc(r.out||'—')+'</b></div></div>';
+  h+='<div class="big"><button class="btn" id="pIn"'+(r.inn?' disabled':'')+'>وصلت</button><button class="btn ghost" id="pOut"'+(r.inn?'':' disabled')+'>'+(r.out?'غادرت (تحديث)':'غادرت')+'</button></div>';
+  var late = t.type==='عادي' && r.inn && mins(r.inn)>mins(t.expFrom), early = t.type==='عادي' && r.out && mins(r.out)<mins(t.expTo);
+  if(late) h+='<label class="f"><span class="warn">تأخرت '+(mins(r.inn)-mins(t.expFrom))+' دقيقة</span> — سبب التأخير</label><textarea class="why" id="wLate" placeholder="اكتب السبب">'+esc(r.lateR||'')+'</textarea>';
+  if(early) h+='<label class="f"><span class="warn">غادرت قبل موعدك بـ '+(mins(t.expTo)-mins(r.out))+' دقيقة</span> — سبب المغادرة المبكرة</label><textarea class="why" id="wEarly" placeholder="اكتب السبب">'+esc(r.earlyR||'')+'</textarea>';
+  if(t.type==='إضافي' && r.inn) h+='<label class="f">المهام التي أنجزتها في هذا الدوام الإضافي</label><textarea class="why" id="wTasks" placeholder="مثال: تجهيز الحفل، تصحيح…">'+esc(r.tasks||'')+'</textarea>';
+  if(late||early||(t.type==='إضافي'&&r.inn)) h+='<button class="btn sm" id="wSave" style="margin-top:8px">حفظ</button>';
+  if(x.editable) h+='<div class="hint"><a href="#" id="attLog">سجل دوامي هذا الشهر وتعديله</a> — إن نسيت التسجيل في يوم، أضفه أو عدّله من هنا.</div>';
+  return h+'</div>';
+}
+function bindAtt(){
+  var i=document.getElementById('pIn'); if(i) i.onclick=function(){ punch('in'); };
+  var o=document.getElementById('pOut'); if(o) o.onclick=function(){ if(S.att.today.rec&&S.att.today.rec.out&&!confirm('سجّلت مغادرتك سابقًا. تحديثها إلى الوقت الحالي؟')) return; punch('out'); };
+  var w=document.getElementById('wSave'); if(w) w.onclick=function(){
+    var p={date:S.att.today.date,type:S.att.today.type}, a=document.getElementById('wLate'), b=document.getElementById('wEarly'), c=document.getElementById('wTasks');
+    if(a) p.lateR=a.value; if(b) p.earlyR=b.value; if(c) p.tasks=c.value;
+    call('webAttSave',[S.teacher,S.pin,p],function(x){ S.att=x; S.attAt=Date.now(); keep(renderHome); toast('حُفظ ✓'); });
+  };
+  var l=document.getElementById('attLog'); if(l) l.onclick=function(e){ e.preventDefault(); S.view='attlog'; renderAttLog(); };
+}
+function punch(k){ call('webPunch',[S.teacher,S.pin,k],function(x){ S.att=x; S.attAt=Date.now(); keep(renderHome); toast(k==='in'?'سُجّل وصولك ✓':'سُجّلت مغادرتك ✓'); }); }
+function toast(m){ var st=document.getElementById('st'), bar=document.getElementById('savebar'); bar.style.display='block'; document.getElementById('saveBtn').style.display='none'; st.className='st ok'; st.textContent=m;
+  clearTimeout(toast.t); toast.t=setTimeout(function(){ if(S.view==='home'){ bar.style.display='none'; } document.getElementById('saveBtn').style.display=''; },2500); }
+function renderAttLog(){
+  S.view='attlog'; who(); document.getElementById('savebar').style.display='none';
+  var x=S.att, h='<div class="card"><h2>سجل دوامي هذا الشهر<span class="grow"></span><button class="fill" id="back">رجوع</button></h2>'+
+    '<div class="hint" style="margin-top:0">عدّل وقت الوصول أو المغادرة لأي يوم ثم اضغط «حفظ» في سطره. اترك الوقتين فارغين لحذف يوم سُجّل بالخطأ.</div></div>';
+  if(!x||!x.days){ app.innerHTML=h+'<div class="card empty">التعديل غير متاح الآن.</div>'; document.getElementById('back').onclick=function(){ goHome(); }; return; }
+  h+='<div class="list" style="margin-top:14px">';
+  x.days.forEach(function(d,i){
+    var r=d.rec||{};
+    h+='<div class="row'+(r.inn?' done':'')+'"><div class="nm"><b>'+esc(d.day)+' '+esc(d.date.slice(8)+'/'+(+d.date.slice(5,7)))+(d.type==='إضافي'?' · إضافي':'')+'</b><small>'+
+      (d.holiday?'عطلة':(d.expFrom?'المعتمد '+esc(d.expFrom)+' – '+esc(d.expTo):'ليس من أيام دوامك'))+'</small></div>'+
+      '<input class="tin" type="time" data-ai="'+i+'" value="'+esc(r.inn||'')+'"><input class="tin" type="time" data-ao="'+i+'" value="'+esc(r.out||'')+'">'+
+      '<button class="btn sm" data-as="'+i+'">حفظ</button></div>';
+  });
+  app.innerHTML=h+'</div><div class="legend">الوقت الأول: الوصول · الوقت الثاني: المغادرة</div>';
+  document.getElementById('back').onclick=function(){ goHome(); };
+  app.querySelectorAll('[data-as]').forEach(function(b){ b.onclick=function(){
+    var i=+b.getAttribute('data-as'), d=x.days[i];
+    var p={date:d.date,type:d.type,inn:app.querySelector('[data-ai="'+i+'"]').value,out:app.querySelector('[data-ao="'+i+'"]').value};
+    call('webAttSave',[S.teacher,S.pin,p],function(y){ S.att=y; S.attAt=Date.now(); renderAttLog(); status('ok','حُفظ ✓'); document.getElementById('savebar').style.display='block'; document.getElementById('saveBtn').style.display='none'; });
+  }; });
+}
+
+// ---------------------------------------------------------------- role pages: tasks (أ. جعفر), قرة أعين (أ. هناء), Telegram (أ. نور عربيات)
+function rolesCard(){
+  var a=S.home&&S.home.adm; if(!a||!(a.tasks||a.quran||a.tg)) return '';
+  var h='<div class="card"><h2>المتابعة الإدارية</h2><div class="roles">';
+  if(a.tasks) h+='<button class="btn" data-role="tasks">المهام الإدارية — '+esc(S.month)+'</button>';
+  if(a.quran) h+='<button class="btn" data-role="quran">قرة أعين — '+esc(S.month)+'</button>';
+  if(a.tg) h+='<button class="btn" data-role="tg">تنزيلات التيليجرام</button>';
+  return h+'</div></div>';
+}
+function bindRoles(){ app.querySelectorAll('[data-role]').forEach(function(b){ b.onclick=function(){ var k=b.getAttribute('data-role'); if(k==='tg') openTg(''); else openTasks(k); }; }); }
+function openTasks(kind){
+  call('webTasksLoad',[S.teacher,S.pin,kind,S.month],function(d){ S.tk=d; S.tk.cur=clone(d.values); S.view='tasks'; setDirty(false); renderTasks(); });
+}
+function tkGet(t,k){ var o=S.tk.cur[t]; return o&&o[k]?o[k]:''; }
+function renderTasks(){
+  who(); var d=S.tk, quran=d.kind==='quran';
+  document.getElementById('savebar').style.display='block'; document.getElementById('saveBtn').style.display=''; document.getElementById('saveBtn').textContent='حفظ';
+  var h='<div class="card"><h2>'+(quran?'قرة أعين':'المهام الإدارية')+' — '+esc(d.month)+'<span class="grow"></span><button class="fill" id="back">رجوع</button></h2>'+
+    '<div class="hint" style="margin-top:0">اضغط الخانة: مرة = ✓ '+(quran?'شاهد':'تم')+'، مرتين = ✗ '+(quran?'لم يشاهد':'لم يتم')+'، ثلاثًا = فارغ. كل ✗ تُحسب مخالفة في الراتب.</div></div><div class="list" style="margin-top:14px">';
+  d.teachers.forEach(function(t,i){
+    h+='<div class="row"><div class="nm" style="flex-basis:100%"><b>'+esc(t)+'</b></div><div class="roles">';
+    d.items.forEach(function(it,j){ var v=tkGet(t,it.key);
+      h+='<button class="tri'+(v==='نعم'?' yes':v==='لا'?' no':'')+'" data-tt="'+i+'" data-tj="'+j+'">'+esc(quran?it.label:it.label.replace('الاجتماع ','').replace('المنهاج المنجز','المنهاج'))+(v==='نعم'?' ✓':v==='لا'?' ✗':'')+(it.range?'<small>'+esc(it.range)+'</small>':'')+'</button>'; });
+    h+='</div></div>';
+  });
+  app.innerHTML=h+'</div>';
+  document.getElementById('back').onclick=function(){ leave(goHome); };
+  app.querySelectorAll('[data-tt]').forEach(function(b){ b.onclick=function(){
+    var t=d.teachers[+b.getAttribute('data-tt')], k=d.items[+b.getAttribute('data-tj')].key, v=tkGet(t,k);
+    if(!d.cur[t]) d.cur[t]={}; d.cur[t][k]= v===''?'نعم':v==='نعم'?'لا':''; setDirty(true); keep(renderTasks);
+  }; });
+}
+function saveTasks(){
+  var d=S.tk, out={}, n=0;
+  d.teachers.forEach(function(t){ d.items.forEach(function(it){ var a=tkGet(t,it.key), b=(d.values[t]||{})[it.key]||''; if(a!==b){ (out[t]=out[t]||{})[it.key]=a; n++; } }); });
+  if(!n){ setDirty(false); return; }
+  call('webTasksSave',[S.teacher,S.pin,d.kind,d.month,out],function(r){ d.values=clone(d.cur); S.dirty=false; document.getElementById('saveBtn').disabled=true; status('ok','تم الحفظ ✓ ('+r.saved+')'); });
+}
+function openTg(date){ call('webTgLoad',[S.teacher,S.pin,date],function(d){ S.tg=d; S.tg.cur=clone(d.values); S.view='tg'; setDirty(false); renderTg(); }); }
+function renderTg(){
+  who(); var d=S.tg, st=d.statuses;
+  document.getElementById('savebar').style.display='block'; document.getElementById('saveBtn').style.display=''; document.getElementById('saveBtn').textContent='حفظ';
+  var h='<div class="card"><h2>تنزيلات التيليجرام<span class="grow"></span><button class="fill" id="back">رجوع</button></h2>'+
+    '<div class="mrow"><span>اليوم</span><input type="date" id="tgDate" value="'+esc(d.date)+'" max="'+esc(d.today)+'" style="width:auto;flex:1;max-width:200px;padding:8px 10px"><span>'+esc(d.day)+'</span></div>'+
+    '<div class="hint" style="margin-top:0">لكل معلم/ة: هل نزّل للأهالي في هذا اليوم؟ «لم ينزّل» تُحسب في الخصم (كل 3 مرات = خصم).</div>'+
+    '<div class="bar"><span class="grow"></span><button class="fill" id="tgFill">عبّئ الفارغ: «نزّل» لمن عليه دوام، «لا يوجد» للباقي</button></div></div><div class="list" style="margin-top:6px">';
+  var short={'نزّل':'نزّل','نزّل متأخرًا':'متأخر','لم ينزّل':'لم ينزّل','لا يوجد تنزيل':'لا يوجد'};
+  d.teachers.slice().sort(function(a,b){ return (b.scheduled?1:0)-(a.scheduled?1:0); }).forEach(function(t){
+    var v=d.cur[t.name]||'';
+    h+='<div class="row'+(t.scheduled?'':' dimrow')+'"><div class="nm"><b>'+esc(t.name)+'</b><small>'+(t.scheduled?'عليه دوام اليوم':'ليس عليه دوام اليوم')+'</small></div><div class="opts">';
+    st.forEach(function(x,j){ h+='<button class="s'+j+(v===x?' on':'')+'" data-tgn="'+esc(t.name)+'" data-tgv="'+esc(x)+'">'+esc(short[x]||x)+'</button>'; });
+    h+='</div></div>';
+  });
+  app.innerHTML=h+'</div>';
+  document.getElementById('back').onclick=function(){ leave(goHome); };
+  document.getElementById('tgDate').onchange=function(){ var v=this.value; leave(function(){ openTg(v); }); };
+  document.getElementById('tgFill').onclick=function(){ d.teachers.forEach(function(t){ if(!d.cur[t.name]){ d.cur[t.name]= t.scheduled?'نزّل':'لا يوجد تنزيل'; } }); setDirty(true); keep(renderTg); };
+  app.querySelectorAll('[data-tgn]').forEach(function(b){ b.onclick=function(){
+    var n=b.getAttribute('data-tgn'), v=b.getAttribute('data-tgv'); d.cur[n]= d.cur[n]===v ? '' : v; setDirty(true); keep(renderTg);
+  }; });
+}
+function saveTg(){
+  var d=S.tg, out={}, n=0;
+  d.teachers.forEach(function(t){ var a=d.cur[t.name]||'', b=d.values[t.name]||''; if(a!==b){ out[t.name]=a; n++; } });
+  if(!n){ setDirty(false); return; }
+  call('webTgSave',[S.teacher,S.pin,d.date,out],function(r){ d.values=clone(d.cur); S.dirty=false; document.getElementById('saveBtn').disabled=true; status('ok','تم الحفظ ✓ ('+r.saved+')'); });
 }
 
 // ---------------------------------------------------------------- install the app (PWA only)
@@ -319,7 +465,7 @@ function hasPrev(){ var o=S.orig; return Object.keys(o.acad).length||Object.keys
 
 function render(){
   who();
-  document.getElementById('savebar').style.display='block';
+  document.getElementById('savebar').style.display='block'; document.getElementById('saveBtn').style.display='';
   document.getElementById('saveBtn').textContent='حفظ';
   var d=S.data;
   var h='<div class="card" style="padding:12px 14px"><div class="bar" style="margin:0">'+
@@ -537,7 +683,7 @@ function opt(list,cur,ph){ var h='<option value="">'+esc(ph)+'</option>'; list.f
 function renderVisit(){
   who();
   var I=S.vinit, v=S.v;
-  document.getElementById('savebar').style.display='block';
+  document.getElementById('savebar').style.display='block'; document.getElementById('saveBtn').style.display='';
   document.getElementById('saveBtn').textContent='حفظ الزيارة';
   var subs = v.cls ? (I.subjects[v.cls]||[]) : [];
   var h='<div class="card"><h2>'+(v.id?'تعديل زيارة':'زيارة حصة جديدة')+'<span class="grow"></span><button class="fill" id="back">رجوع</button></h2>'+
@@ -618,7 +764,7 @@ function saveVisit(){
   });
 }
 
-document.getElementById('saveBtn').onclick=function(){ if(S.view==='visit') saveVisit(); else saveClass(); };
+document.getElementById('saveBtn').onclick=function(){ if(S.view==='visit') saveVisit(); else if(S.view==='tasks') saveTasks(); else if(S.view==='tg') saveTg(); else saveClass(); };
 start();
 </script>
 <script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js');});}</script>
