@@ -91,7 +91,7 @@ select,input[type=password],input[type=text],input[type=date]{width:100%;padding
 .trow:first-child{border-top:0}
 .trow .lab{flex:1;min-width:170px;font-size:14px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
-footer.save{position:fixed;bottom:0;inset-inline:0;background:rgba(255,255,255,.96);border-top:1px solid var(--line);padding:10px 14px;backdrop-filter:blur(6px);z-index:10}
+footer.save{position:fixed;bottom:0;inset-inline:0;background:rgba(255,255,255,.96);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));backdrop-filter:blur(6px);z-index:10}
 footer.save .in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:12px}
 footer.save .st{flex:1;font-size:13px;color:var(--muted)}
 footer.save .st.dirty{color:var(--accent);font-weight:600}
@@ -174,13 +174,20 @@ function call(fn,args,ok,onFail,quiet){
     r[fn].apply(r,args);
   }
   if(API_URL.indexOf('https://')!==0 || !window.fetch){ viaScriptRun(); return; }
-  fetch(API_URL,{method:'POST',credentials:'omit',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn:fn,args:args})})
+  var ctl=window.AbortController? new AbortController() : null, timer=setTimeout(function(){ if(ctl) ctl.abort(); }, 60000);
+  fetch(API_URL,{method:'POST',credentials:'omit',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn:fn,args:args}),signal:ctl?ctl.signal:undefined})
     .then(function(r){ if(!r.ok) throw new Error('http'); return r.json(); })
-    .then(function(res){ if(res && res.ok){ done(); ok(res.v); } else fail(res && res.err); })
-    .catch(function(){ viaScriptRun(); });
+    .then(function(res){
+      clearTimeout(timer);
+      if(res && res.ok){ done(); setTimeout(function(){ ok(res.v); },0); } else fail(res && res.err);
+    }, function(e){
+      clearTimeout(timer);
+      if(e && e.name==='AbortError'){ fail('انتهت مهلة الاتصال. تحقّق من الإنترنت ثم أعد المحاولة؛ إن كنت حفظت، افتح الصفحة من جديد لترى هل وصل الحفظ.'); return; }
+      if(!IS_APP && window.google && google.script && google.script.run) viaScriptRun(); else fail('تعذّر الاتصال بالخادم. تأكد من الإنترنت ثم أعد المحاولة.');
+    });
 }
 function store(k,v){try{ if(v===undefined) return localStorage.getItem(k); if(v===null) localStorage.removeItem(k); else localStorage.setItem(k,v);}catch(e){return null;}}
-function forget(){ store('albaraem_pin',null); store('albaraem_home',null); S.pin=''; S.homes={}; S.classes={}; S.att=null; }
+function forget(){ store('albaraem_pin',null); store('albaraem_home',null); S.pin=''; S.homes={}; S.classes={}; S.home=null; S.att=null; S.attAt=0; S.attBusy=false; S.vinit=null; S.v=null; S.tk=null; S.tg=null; S.dirty=false; }
 function jget(k){ try{ return JSON.parse(store(k)||'null'); }catch(e){ return null; } }
 function jput(k,v){ try{ store(k,JSON.stringify(v)); }catch(e){} }
 function thisMonth(months,fallback){ var d=new Date(), m=(d.getMonth()+1)+'/'+d.getFullYear(); return months.indexOf(m)>=0 ? m : (fallback && months.indexOf(fallback)>=0 ? fallback : months[0]); }
@@ -207,7 +214,7 @@ function start(){
     if(last && last.key===hkey()){ S.homes[hkey()]=last.h; S.home=last.h; S.sup=!!last.h.supervisor; renderHome(); }
     call('webBootstrap',[],gotBoot,function(){},true);
     homeFetch(!S.home, function(m){
-      if(/غير صحيح|غير موجود/.test(m||'')){ forget(); renderLogin(); return; }
+      if(/غير صحيح|غير موجود|لا يوجد رمز/.test(m||'')){ forget(); renderLogin(); return; }
       if(S.home) return;   // keep showing the cached page
       app.innerHTML='<div class="card"><h2>تعذّر الاتصال</h2><div class="hint" style="margin-top:0">'+esc(m||'تأكد من اتصال الإنترنت ثم أعد المحاولة.')+'</div><button class="btn block" onclick="location.reload()">إعادة المحاولة</button></div>';
     });
@@ -221,8 +228,8 @@ function renderLogin(){
   document.getElementById('savebar').style.display='none';
   document.getElementById('who').innerHTML='';
   var b=S.boot, t=b.teachers, opts='<option value="">— اختر اسمك —</option>';
-  t.forEach(function(x){opts+='<option'+(x.name===S.teacher?' selected':'')+'>'+esc(x.name)+'</option>';});
-  var mo=''; b.months.forEach(function(m){mo+='<option'+(m===S.month?' selected':'')+'>'+esc(m)+'</option>';});
+  t.forEach(function(x){opts+='<option value="'+esc(x.name)+'"'+(x.name===S.teacher?' selected':'')+'>'+esc(x.name)+'</option>';});
+  var mo=''; b.months.forEach(function(m){mo+='<option value="'+esc(m)+'"'+(m===S.month?' selected':'')+'>'+esc(m)+'</option>';});
   app.innerHTML='<div class="card"><h2>الدخول</h2>'+
     '<label class="f">الاسم</label><select id="tSel">'+opts+'</select>'+
     '<div id="pinBox"></div>'+
@@ -232,7 +239,7 @@ function renderLogin(){
   var tSel=document.getElementById('tSel');
   function pinUi(){
     var x=t.filter(function(y){return y.name===tSel.value;})[0];
-    document.getElementById('pinBox').innerHTML = x&&x.pin ? '<label class="f">رمز الدخول</label><input type="password" id="pin" inputmode="numeric" maxlength="8" autocomplete="off">' : '';
+    document.getElementById('pinBox').innerHTML = x ? '<label class="f">رمز الدخول</label><input type="password" id="pin" inputmode="numeric" maxlength="8" autocomplete="off">' : '';
   }
   tSel.onchange=pinUi; pinUi();
   document.getElementById('go').onclick=function(){
@@ -242,7 +249,17 @@ function renderLogin(){
     call('webHome',[S.teacher,S.pin,S.month],function(h){ store('albaraem_teacher',S.teacher); store('albaraem_pin',S.pin); gotHome(h); renderHome(); });
   };
 }
+// phone back button: inside a page it goes to the home page (asking first if something is unsaved) instead of closing the app
+var navOn=false;
+window.addEventListener('popstate',function(){
+  navOn=false;
+  if(S.view==='home'||S.view==='login') return;
+  if(S.dirty && !confirm(LEAVE)){ navMark(); return; }
+  setDirty(false); goHome();
+});
+function navMark(){ if(navOn||S.view==='home'||S.view==='login') return; try{ history.pushState({albaraem:1},''); navOn=true; }catch(e){} }
 function who(){
+  navMark();
   document.getElementById('who').innerHTML=esc(S.teacher)+' · '+esc(S.month)+'<br>'+
     (S.view!=='home'?'<a id="homeL">الرئيسية</a>':'')+'<a id="out">خروج</a>';
   var h=document.getElementById('homeL'); if(h) h.onclick=function(){ leave(goHome); };
@@ -250,26 +267,28 @@ function who(){
 }
 
 // ---------------------------------------------------------------- home: my evaluations + visits
-function gotHome(h){ S.home=h; S.sup=!!h.supervisor; S.homes[hkey()]=h; jput('albaraem_home',{key:hkey(),h:h}); }
-function homeFetch(loud,onFail){
-  var k=hkey();
+function gotHome(h){
+  if(h && h.adm && h.adm.err){ var prev=S.home||S.homes[hkey()]||(jget('albaraem_home')||{}).h; h.adm=(prev && prev.adm && !prev.adm.err)? prev.adm : {}; }
+  S.home=h; S.sup=!!h.supervisor; S.homes[hkey()]=h; jput('albaraem_home',{key:hkey(),h:h}); }
+function homeFetch(loud,onFail,force){
+  var k=hkey(), v0=S.view;
   call('webHome',[S.teacher,S.pin,S.month],function(h){
     var changed=JSON.stringify(h)!==JSON.stringify(S.homes[k]);
     gotHome(h);
-    // redraw only while the teacher is looking at the home page (or still waiting for it) — never over a class or a visit
-    if(S.pin && hkey()===k && (S.view==='login' || (S.view==='home' && changed))) renderHome();
+    // redraw only while the teacher is looking at the home page (or asked for it) — never over a class or a visit opened meanwhile
+    if(S.pin && hkey()===k && (S.view==='login' || (force && S.view===v0) || (S.view==='home' && changed))) renderHome();
   }, onFail, !loud);
 }
 function goHome(){
   var c=S.homes[hkey()];
   if(c){ S.home=c; S.sup=!!c.supervisor; renderHome(); homeFetch(false,function(){}); }
-  else homeFetch(true);
+  else homeFetch(true,undefined,true);
 }
 function renderHome(){
   S.view='home'; who();
   document.getElementById('savebar').style.display='none';
   var h=S.home, done={}, html=installCard()+attCard()+rolesCard()+'<div class="card"><h2>تقييماتي الشهرية</h2>'+
-    '<div class="mrow"><span>الشهر</span><select id="hMonth">'+S.boot.months.map(function(m){return '<option'+(m===S.month?' selected':'')+'>'+esc(m)+'</option>';}).join('')+'</select></div>';
+    '<div class="mrow"><span>الشهر</span><select id="hMonth">'+S.boot.months.map(function(m){return '<option value="'+esc(m)+'"'+(m===S.month?' selected':'')+'>'+esc(m)+'</option>';}).join('')+'</select></div>';
   if(h.classes.length){
     html+='<div class="list">';
     h.classes.forEach(function(c){
@@ -306,7 +325,16 @@ function renderHome(){
 }
 
 // ---------------------------------------------------------------- daily attendance (every teacher in the follow-up)
-function attFetch(){ S.attBusy=true; call('webAttInit',[S.teacher,S.pin],function(x){ S.att=x; S.attAt=Date.now(); S.attBusy=false; if(S.view==='home') keep(renderHome); else if(S.view==='attlog') renderAttLog(); },function(){ S.attBusy=false; },true); }
+function attFetch(){ var who0=S.teacher; S.attBusy=true; call('webAttInit',[S.teacher,S.pin],function(x){ S.attBusy=false; if(S.teacher!==who0||!S.pin) return; S.att=x; S.attAt=Date.now(); if(S.view==='home') homeKeepWhy(); },function(){ S.attBusy=false; },true); }
+/** Redraws home but keeps reasons the teacher was typing. */
+function homeKeepWhy(){ var ids=['wLate','wEarly','wTasks'], v={}; ids.forEach(function(k){ var e=document.getElementById(k); if(e) v[k]=e.value; });
+  keep(renderHome); ids.forEach(function(k){ var e=document.getElementById(k); if(e && v[k]!==undefined) e.value=v[k]; }); }
+function localIso(){ var d=new Date(), p=function(n){return (n<10?'0':'')+n;}; return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+// back to the app on another day (phones keep it open for days): today's card must be today's
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState!=='visible' || !S.pin || S.view!=='home' || !S.att || S.attBusy) return;
+  if(S.att.today && S.att.today.date!==localIso() || Date.now()-(S.attAt||0)>600000) attFetch();
+});
 function mins(t){ var m=String(t||'').match(/^(\d{1,2}):(\d{2})/); return m? (+m[1])*60+(+m[2]) : null; }
 function attCard(){
   var a=S.home&&S.home.adm; if(!a||!a.att) return '';
@@ -336,10 +364,10 @@ function bindAtt(){
   };
   var l=document.getElementById('attLog'); if(l) l.onclick=function(e){ e.preventDefault(); S.view='attlog'; renderAttLog(); };
 }
-function punch(k){ call('webPunch',[S.teacher,S.pin,k],function(x){ S.att=x; S.attAt=Date.now(); keep(renderHome); toast(k==='in'?'سُجّل وصولك ✓':'سُجّلت مغادرتك ✓'); }); }
+function punch(k){ if(punch.on) return; punch.on=true; call('webPunch',[S.teacher,S.pin,k],function(x){ punch.on=false; S.att=x; S.attAt=Date.now(); homeKeepWhy(); toast(k==='in'?'سُجّل وصولك ✓':'سُجّلت مغادرتك ✓'); },function(m){ punch.on=false; status('err',m||'حدث خطأ، حاول مرة أخرى'); }); }
 function toast(m){ var st=document.getElementById('st'), bar=document.getElementById('savebar'); bar.style.display='block'; document.getElementById('saveBtn').style.display='none'; st.className='st ok'; st.textContent=m;
   clearTimeout(toast.t); toast.t=setTimeout(function(){ if(S.view==='home'){ bar.style.display='none'; } document.getElementById('saveBtn').style.display=''; },2500); }
-function renderAttLog(){
+function renderAttLog(dr){
   S.view='attlog'; who(); document.getElementById('savebar').style.display='none';
   var x=S.att, h='<div class="card"><h2>سجل دوامي<span class="grow"></span><button class="fill" id="back">رجوع</button></h2>'+
     '<div class="hint" style="margin-top:0">اكتب وقت وصولك ومغادرتك لكل يوم داومت فيه، ثم اضغط «حفظ» في سطره. إن تأخرت أو غادرت قبل موعدك تظهر خانة السبب. '+
@@ -371,21 +399,29 @@ function renderAttLog(){
     box.innerHTML=t;
     box.querySelectorAll('textarea').forEach(function(a){ var k=a.getAttribute('data-wl')?'l':a.getAttribute('data-we')?'e':'t'; if(keep[k]!==undefined) a.value=keep[k]; });
   }
-  x.days.forEach(function(d,i){ whyBox(i); });
+  if(dr){ x.days.forEach(function(d,i){ var w=dr[d.date+'|'+d.type]; if(!w) return; app.querySelector('[data-ai="'+i+'"]').value=w.inn; app.querySelector('[data-ao="'+i+'"]').value=w.out; });
+    if(dr._x) Object.keys(dr._x).forEach(function(id){ var e=document.getElementById(id); if(e) e.value=dr._x[id]; }); }
+  x.days.forEach(function(d,i){ whyBox(i);
+    var w=dr&&dr[d.date+'|'+d.type]; if(w) ['wl','we','wt'].forEach(function(z){ var e=app.querySelector('[data-'+z+'="'+i+'"]'); if(e&&w[z]!==undefined) e.value=w[z]; }); });
   app.querySelectorAll('[data-ai],[data-ao]').forEach(function(inp){ inp.onchange=function(){ whyBox(+(inp.getAttribute('data-ai')||inp.getAttribute('data-ao'))); }; });
   document.getElementById('back').onclick=function(){ goHome(); };
-  function saved(y){ S.att=y; S.attAt=Date.now(); var sy=window.scrollY; renderAttLog(); window.scrollTo(0,sy); status('ok','حُفظ ✓'); document.getElementById('savebar').style.display='block'; document.getElementById('saveBtn').style.display='none'; }
+  function drafts(){ var o={}; x.days.forEach(function(d,i){ var r=d.rec||{}, k=d.date+'|'+d.type, ai=app.querySelector('[data-ai="'+i+'"]'), ao=app.querySelector('[data-ao="'+i+'"]');
+      if(!ai) return; var w={inn:ai.value,out:ao.value}; ['wl','we','wt'].forEach(function(z){ var e=app.querySelector('[data-'+z+'="'+i+'"]'); if(e) w[z]=e.value; });
+      if(w.inn!==(r.inn||'')||w.out!==(r.out||'')||(w.wl!==undefined&&w.wl!==(r.lateR||''))||(w.we!==undefined&&w.we!==(r.earlyR||''))||(w.wt!==undefined&&w.wt!==(r.tasks||''))) o[k]=w; });
+    ['xDate','xIn','xOut','xTasks'].forEach(function(id){ var e=document.getElementById(id); if(e&&e.value) (o._x=o._x||{})[id]=e.value; });
+    return o; }
+  function saved(y,except){ if(S.view!=='attlog'){ S.att=y; S.attAt=Date.now(); return; } var dr=drafts(); delete dr[except]; S.att=y; S.attAt=Date.now(); var sy=window.scrollY; renderAttLog(dr); window.scrollTo(0,sy); status('ok','حُفظ ✓'); document.getElementById('savebar').style.display='block'; document.getElementById('saveBtn').style.display='none'; }
   app.querySelectorAll('[data-as]').forEach(function(b){ b.onclick=function(){
     var i=+b.getAttribute('data-as'), d=x.days[i], q=function(sel){ var e=app.querySelector(sel); return e?e.value:undefined; };
     var p={date:d.date,type:d.type,inn:q('[data-ai="'+i+'"]'),out:q('[data-ao="'+i+'"]')};
     var l=q('[data-wl="'+i+'"]'), e=q('[data-we="'+i+'"]'), t=q('[data-wt="'+i+'"]');
     if(l!==undefined) p.lateR=l; if(e!==undefined) p.earlyR=e; if(t!==undefined) p.tasks=t;
-    call('webAttSave',[S.teacher,S.pin,p],saved);
+    call('webAttSave',[S.teacher,S.pin,p],function(y){ saved(y,d.date+'|'+d.type); });
   }; });
   document.getElementById('xSave').onclick=function(){
     var p={date:document.getElementById('xDate').value,type:'إضافي',inn:document.getElementById('xIn').value,out:document.getElementById('xOut').value,tasks:document.getElementById('xTasks').value};
     if(!p.date||!p.inn){ status('err','اختر التاريخ ووقت الوصول.'); return; }
-    call('webAttSave',[S.teacher,S.pin,p],saved);
+    call('webAttSave',[S.teacher,S.pin,p],function(y){ if(S.view!=='attlog'){ S.att=y; S.attAt=Date.now(); return; } var dr=drafts(); delete dr._x; S.att=y; S.attAt=Date.now(); var sy=window.scrollY; renderAttLog(dr); window.scrollTo(0,sy); status('ok','حُفظ اليوم الإضافي ✓'); document.getElementById('savebar').style.display='block'; document.getElementById('saveBtn').style.display='none'; });
   };
 }
 
@@ -444,7 +480,9 @@ function renderTg(){
   });
   app.innerHTML=h+'</div>';
   document.getElementById('back').onclick=function(){ leave(goHome); };
-  document.getElementById('tgDate').onchange=function(){ var v=this.value; leave(function(){ openTg(v); }); };
+  document.getElementById('tgDate').onchange=function(){ var inp=this, v=inp.value;
+    if(!v || (S.dirty && !confirm(LEAVE))){ inp.value=d.date; return; }
+    call('webTgLoad',[S.teacher,S.pin,v],function(n){ S.tg=n; S.tg.cur=clone(n.values); setDirty(false); renderTg(); },function(m){ inp.value=d.date; status('err',m||'حدث خطأ، حاول مرة أخرى'); }); };
   document.getElementById('tgFill').onclick=function(){ d.teachers.forEach(function(t){ if(!d.cur[t.name]){ d.cur[t.name]= t.scheduled?'نزّل':'لا يوجد تنزيل'; } }); setDirty(true); keep(renderTg); };
   app.querySelectorAll('[data-tgn]').forEach(function(b){ b.onclick=function(){
     var n=b.getAttribute('data-tgn'), v=b.getAttribute('data-tgv'); d.cur[n]= d.cur[n]===v ? '' : v; setDirty(true); keep(renderTg);
@@ -619,7 +657,7 @@ function bind(){
   app.querySelectorAll('[data-g]').forEach(function(inp){
     inp.oninput=function(){
       var st=S.data.students[+inp.getAttribute('data-g')], v=inp.value.trim(), n=Number(v);
-      var bad = v!=='' && (isNaN(n)||n<0||n>100);
+      var bad = (inp.validity && inp.validity.badInput) || (v!=='' && (isNaN(n)||n<0||n>100));
       inp.classList.toggle('bad',bad);
       if(!bad){ put('acad',st.name,S.subject, v===''?'':n); inp.parentNode.classList.toggle('done',v!==''); }
     };
@@ -695,7 +733,8 @@ function saveClass(){
       var order=S.boot.classes; h.classes.sort(function(a,b){return order.indexOf(a.cls)-order.indexOf(b.cls);});
     }
     document.getElementById('saveBtn').disabled=true;
-    status('ok','تم الحفظ ✓ ('+r.students+' طالبًا) — يمكنك التعديل والحفظ مرة أخرى');
+    if(r.rejected) status('err','حُفظ '+r.students+' طالبًا، لكن '+r.rejected+' قيمة لم تُقبل (خارج المدى). راجع الخانات الحمراء.');
+    else status('ok','تم الحفظ ✓ ('+r.students+' طالبًا) — يمكنك التعديل والحفظ مرة أخرى');
   });
 }
 
@@ -792,7 +831,7 @@ function saveVisit(){
   });
 }
 
-document.getElementById('saveBtn').onclick=function(){ if(S.view==='visit') saveVisit(); else if(S.view==='tasks') saveTasks(); else if(S.view==='tg') saveTg(); else saveClass(); };
+document.getElementById('saveBtn').onclick=function(){ if(busy>0) return; if(S.view==='visit') saveVisit(); else if(S.view==='tasks') saveTasks(); else if(S.view==='tg') saveTg(); else saveClass(); };
 start();
 </script>
 <script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js');});}</script>
