@@ -540,7 +540,7 @@ function openClass(c){
 /** After the home page: load the classes the teacher already works on in the background, one at a time, so «تعديل» opens at once. */
 function prefetchClasses(){
   if(prefetchClasses.on || !S.home || !S.home.classes) return;
-  var k=hkey(), list=S.home.classes.map(function(x){return x.cls;}).filter(function(c){ return !S.classes[k+'|'+c]; }).slice(0,4);
+  var k=hkey(), list=S.home.classes.map(function(x){return x.cls;}).concat(S.home.recent||[]).filter(function(c){ return !S.classes[k+'|'+c]; }).slice(0,4);
   if(!list.length) return;
   prefetchClasses.on=true;
   (function next(){
