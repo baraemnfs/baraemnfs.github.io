@@ -901,8 +901,9 @@ function renderVisit(){
     '<div><label class="f">المعلم/ة</label><select id="vT">'+opt(I.teachers,v.teacher,'— اختر —')+'</select></div></div>'+
     '<label class="f">عنوان الدرس (اختياري)</label><input type="text" id="vL" value="'+esc(v.lesson)+'"></div>';
   // teacher evaluation
-  h+='<div class="card"><h2>تقييم أداء المعلم/ة في الحصة (1–5)</h2>';
-  I.items.forEach(function(k,i){
+  var tq=I.tq && v.subject===I.tq.subject, tItems=vItems();
+  h+='<div class="card"><h2>'+(tq?'تقييم حصة التلقين (1–5)':'تقييم أداء المعلم/ة في الحصة (1–5)')+'</h2>';
+  tItems.forEach(function(k,i){
     var x=v.items[k]; h+='<div class="trow"><div class="lab">'+esc(k)+'</div><div class="sc">';
     for(var n=1;n<=5;n++) h+='<button data-ti="'+i+'" data-v="'+n+'"'+(String(x)===String(n)?' class="on"':'')+'>'+n+'</button>';
     h+='</div></div>';
@@ -935,6 +936,8 @@ function renderVisit(){
   app.innerHTML=h;
   bindVisit();
 }
+/** Talqeen lessons have their own teacher items. */
+function vItems(){ var I=S.vinit; return (I.tq && S.v.subject===I.tq.subject) ? I.tq.items : I.items; }
 function vval(name,key){ var o=S.v.students[name]; return o && o[key]!=null ? o[key] : ''; }
 function vput(name,key,x){ if(!S.v.students[name]) S.v.students[name]={}; S.v.students[name][key]=x; setDirty(true); }
 function bindVisit(){
@@ -942,10 +945,10 @@ function bindVisit(){
   document.getElementById('back').onclick=function(){ leave(goHome); };
   document.getElementById('vDate').onchange=function(){ v.date=this.value; setDirty(true); };
   document.getElementById('vCls').onchange=function(){ v.cls=this.value; v.subject=''; v.students={}; setDirty(true); keep(renderVisit); };
-  document.getElementById('vSub').onchange=function(){ v.subject=this.value; setDirty(true); };
+  document.getElementById('vSub').onchange=function(){ var was=vItems(); v.subject=this.value; setDirty(true); if(vItems()!==was) keep(renderVisit); };
   document.getElementById('vT').onchange=function(){ v.teacher=this.value; setDirty(true); };
   document.getElementById('vL').oninput=function(){ v.lesson=this.value; setDirty(true); };
-  app.querySelectorAll('[data-ti]').forEach(function(b){ b.onclick=function(){ var k=I.items[+b.getAttribute('data-ti')], n=+b.getAttribute('data-v');
+  app.querySelectorAll('[data-ti]').forEach(function(b){ b.onclick=function(){ var k=vItems()[+b.getAttribute('data-ti')], n=+b.getAttribute('data-v');
     v.items[k] = String(v.items[k])===String(n) ? '' : n; setDirty(true); keep(renderVisit); }; });
   app.querySelectorAll('[data-tx]').forEach(function(t){ t.oninput=function(){ v.texts[I.texts[+t.getAttribute('data-tx')]]=t.value; setDirty(true); }; });
   app.querySelectorAll('[data-vi]').forEach(function(b){ b.onclick=function(){ S.vItem=+b.getAttribute('data-vi'); keep(renderVisit); }; });
