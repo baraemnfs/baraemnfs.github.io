@@ -80,6 +80,15 @@ select,input[type=password],input[type=text],input[type=date]{width:100%;padding
 .grade.bad{border-color:var(--warn);background:#fdecea}
 .nb{flex-shrink:0;border:1px solid var(--line);background:#fff;border-radius:9px;height:34px;padding:0 9px;cursor:pointer;font-size:12.5px;color:var(--muted)}
 .nb.has{border-color:var(--accent);color:var(--accent);background:#fffaf0;font-weight:600}
+.sc.four button{min-width:0;width:auto;flex:1;height:auto;min-height:44px;padding:4px 2px;font-size:12px;line-height:1.2;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.sc.four button small{font-size:11px;opacity:.65;margin-top:2px}
+.row.wrap4{flex-wrap:wrap}
+.row.wrap4 .nm{flex-basis:calc(100% - 50px)}
+.row.wrap4 .sc.four{order:3;flex-basis:100%;margin-top:6px}
+.obstrip{display:none;position:fixed;bottom:calc(84px + env(safe-area-inset-bottom,0px));inset-inline:10px;z-index:60;background:#fff8e1;border:1px solid #f0d27a;color:#6b5200;border-radius:12px;padding:8px 12px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.08);cursor:pointer;text-align:center}
+.obstrip.ok{background:#eaf6ec;border-color:#9fd1a8;color:#1d5b2a}
+.obstrip.bad{background:#fdecec;border-color:#eba4a4;color:#8a1f1f}
+textarea.need{border-color:#d9534f;box-shadow:0 0 0 3px rgba(217,83,79,.15)}
 .noteRow{flex-basis:100%;display:flex}
 .noteRow textarea,.row textarea.t{flex:1;min-height:40px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;resize:vertical;background:#fff}
 .row textarea.t{flex:1.4}
@@ -285,7 +294,7 @@ function goHome(){
   else homeFetch(true,undefined,true);
 }
 function renderHome(){
-  S.view='home'; who();
+  S.view='home'; who(); setTimeout(prefetchClasses, 600); setTimeout(obFlush, 300);
   document.getElementById('savebar').style.display='none';
   var h=S.home, done={}, html=installCard()+attCard()+rolesCard()+'<div class="card"><h2>تقييماتي الشهرية</h2>'+
     '<div class="mrow"><span>الشهر</span><select id="hMonth">'+S.boot.months.map(function(m){return '<option value="'+esc(m)+'"'+(m===S.month?' selected':'')+'>'+esc(m)+'</option>';}).join('')+'</select></div>';
@@ -520,12 +529,27 @@ function openClass(c){
   function show(d){
     S.cls=c; S.data=d; S.acad=clone(d.acad); S.edu=clone(d.edu); S.det=clone(d.det);
     S.orig={acad:clone(d.acad),edu:clone(d.edu),det:clone(d.det)}; S.open={};
-    S.subject=d.subjects[0]||''; S.si=0; S.quick=0; S.group=0; S.item=0;
+    var rs=store('albaraem_subj|'+S.teacher+'|'+c); S.subject=(rs && d.subjects.indexOf(rs)>=0)? rs : (d.subjects[0]||''); S.si=0; S.quick=0; S.group=0; S.item=0; S.allItems=false;
     if(S.tab!=='grades'&&S.tab!=='quick'&&S.tab!=='edu') S.tab='grades';
     S.view='class'; setDirty(false); render();
   }
   if(S.classes[ck]){ show(S.classes[ck]); return; }   // only this teacher writes these rows, so the session copy stays right
-  call('webLoadClass',[S.teacher,S.pin,S.month,c],function(d){ S.classes[ck]=d; show(d); });
+  var t0=Date.now(), dk0=S.teacher+'|'+S.month+'|'+c;
+  call('webLoadClass',[S.teacher,S.pin,S.month,c],function(d){ if(obDone[dk0]>t0){ openClass(c); return; } d=withPending(d,c); S.classes[ck]=d; show(d); });
+}
+/** After the home page: load the classes the teacher already works on in the background, one at a time, so «تعديل» opens at once. */
+function prefetchClasses(){
+  if(prefetchClasses.on || !S.home || !S.home.classes) return;
+  var k=hkey(), list=S.home.classes.map(function(x){return x.cls;}).filter(function(c){ return !S.classes[k+'|'+c]; }).slice(0,4);
+  if(!list.length) return;
+  prefetchClasses.on=true;
+  (function next(){
+    if(!list.length || hkey()!==k || !S.pin){ prefetchClasses.on=false; return; }
+    var c=list.shift();
+    if(S.classes[k+'|'+c]){ next(); return; }
+    var t0=Date.now(), dk0=S.teacher+'|'+S.month+'|'+c;
+    call('webLoadClass',[S.teacher,S.pin,S.month,c],function(d){ if(hkey()===k && !S.classes[k+'|'+c] && !(obDone[dk0]>t0)) S.classes[k+'|'+c]=withPending(d,c); next(); },function(){ prefetchClasses.on=false; },true);
+  })();
 }
 function hasPrev(){ var o=S.orig; return Object.keys(o.acad).length||Object.keys(o.edu).length||Object.keys(o.det).length; }
 
@@ -541,7 +565,7 @@ function render(){
   h+='<div class="tabs">'+tabBtn('grades','المواد')+tabBtn('quick','السلوك في الحصة')+tabBtn('edu','التقييم التربوي')+'</div>';
   if(!d.students.length) h+='<div class="card empty">لا يوجد طلاب مسجّلون في هذا الصف.</div>';
   else if(S.tab==='grades') h+=gradesView();
-  else if(S.tab==='quick') h+=ratingView(d.quick, 'quick');
+  else if(S.tab==='quick'){ h+=subjPick(); var qi=quickItems(); if(S.quick>=qi.length) S.quick=0; h+= qi.length? ratingView(qi,'quick') : '<div class="card empty">لا توجد بنود سلوك لهذه المادة.</div>'; }
   else h+=eduView();
   app.innerHTML=h;
   bind();
@@ -552,12 +576,37 @@ function tabBtn(k,l){return '<button class="tab'+(S.tab===k?' on':'')+'" data-ta
 function dk(sub,item){return sub+'||'+item;}
 function dget(name,sub,item,f){ var o=S.det[name]&&S.det[name][dk(sub,item)]; var v=o?o[f]:''; return v==null?'':v; }
 function dput(name,sub,item,f,v){ if(!S.det[name]) S.det[name]={}; var k=dk(sub,item); if(!S.det[name][k]) S.det[name][k]={lvl:'',note:''}; S.det[name][k][f]=v; setDirty(true); }
-function subItems(){ var d=S.data; return [{label:'العلامة (من 100)', grade:true, item:d.gradeItem}].concat((d.skills[S.subject]||[]).map(function(k){return {label:k, item:k};})); }
+// skills table markers: «سلوك: …» rated with the class behaviour, «نص: …» free text, «تقدير: …» four levels, «بلا علامة» no grade
+var RATEW=['يحتاج تدريب','مقبول','جيد','جيد جدًا','ممتاز'];   // «تقدير:» items: five levels in words, number under each
+function skillList(sub){ return (S.data.skills[sub]||[]); }
+function kindOf(x){ x=String(x); if(x==='بلا علامة') return 'nograde'; if(x.indexOf('سلوك:')===0) return 'beh'; if(x.indexOf('نص:')===0) return 'text'; if(x.indexOf('تقدير:')===0) return 'rate4'; return 'rate'; }
+function labelOf(x){ return String(x).replace(/^(سلوك|نص|تقدير):\s*/,''); }
+function subItems(){ var d=S.data, l=skillList(S.subject), out=[];
+  if(l.indexOf('بلا علامة')<0) out.push({label:'العلامة (من 100)', grade:true, item:d.gradeItem});
+  l.forEach(function(k){ var t=kindOf(k); if(t==='nograde'||t==='beh') return; out.push({label:labelOf(k), item:k, kind:t}); });
+  return out; }
+function hasHomework(sub){ return skillList(sub).some(function(k){ return kindOf(k)!=='beh' && /الواجب/.test(k); }); }
+/** Behaviour items for the chosen subject: its profile (e.g. English: homework + participation), homework moved to the
+ *  subject when the subject rates it, plus the subject's own «سلوك:» items (stored with the subject details). */
+function quickItems(){ var d=S.data, prof=(d.profiles||{})[S.subject]||{}, base=d.quick.slice();
+  if(!S.allItems){
+    if(prof.quick) base=base.filter(function(q){ return prof.quick.indexOf(q.key)>=0; });
+    if(hasHomework(S.subject)) base=base.filter(function(q){ return q.key!=='الالتزام بأداء الواجبات'; });
+  }
+  skillList(S.subject).forEach(function(k){ if(kindOf(k)==='beh') base.push({key:k,label:labelOf(k),det:true,sub:S.subject}); });
+  return base; }
+function subjPick(){ var d=S.data; if(!d.subjects.length) return '';
+  var h='<div class="sub"><div class="lbl">البنود حسب المادة</div><div class="chips small">';
+  d.subjects.forEach(function(s){ h+='<button class="chip'+(s===S.subject&&!S.allItems?' on':'')+'" data-sub="'+esc(s)+'">'+esc(s)+'</button>'; });
+  return h+'<button class="chip'+(S.allItems?' on':'')+'" data-all="1">كل البنود</button></div>'+
+    '<div class="hint" style="margin-top:6px">اختيار المادة يحدد البنود الظاهرة فقط؛ تقييمك في هذا التبويب واحد لهذا الصف مهما كانت المادة.</div></div>'; }
+function iv(it,sh,name){ return it.det ? dget(name,it.sub,it.key,'lvl') : val(sh,name,it.key); }
+function ip(it,sh,name,v){ if(it.det) dput(name,it.sub,it.key,'lvl',v); else put(sh,name,it.key,v); }
 function noteBtn(name,item,i){ var k=name+'|'+dk(S.subject,item), has=String(dget(name,S.subject,item,'note')).trim()!=='';
   return '<button class="nb'+(has?' has':'')+'" data-nb="'+i+'" title="ملاحظة اختيارية">✎'+(has?' ملاحظة':'')+'</button>'; }
 function noteRow(name,item,i){ var k=name+'|'+dk(S.subject,item), v=dget(name,S.subject,item,'note');
   if(!S.open[k] && String(v).trim()==='') return '';
-  return '<div class="noteRow"><textarea data-n="'+i+'" placeholder="ملاحظة اختيارية: سبب العلامة أو تنبيه">'+esc(v)+'</textarea></div>'; }
+  return '<div class="noteRow"><textarea data-n="'+i+'" placeholder="'+(item===S.data.gradeItem?'ملاحظة إجبارية مع العلامة: سببها أو ما يحتاجه الطالب':'ملاحظة اختيارية: سبب التقييم أو تنبيه')+'">'+esc(v)+'</textarea></div>'; }
 
 function gradesView(){
   var d=S.data, h='<div class="sub"><div class="lbl">المادة</div><div class="chips">';
@@ -568,9 +617,10 @@ function gradesView(){
   h+='</div></div>';
   if(!S.subject) return h+'<div class="card empty">لا توجد مواد محددة لهذا الصف في الإعدادات.</div>';
   var items=subItems(); if(S.si>=items.length) S.si=0;
+  if(!items.length) return h+'<div class="card empty">لا توجد بنود لهذه المادة في جدول المهارات.</div>';
   h+='<div class="sub"><div class="lbl">العلامة ومهارات المادة (المهارة: مستوى إتقان من 1 إلى 5)</div><div class="chips small">';
   items.forEach(function(it,i){
-    var n=d.students.filter(function(st){return it.grade ? val('acad',st.name,S.subject)!=='' : dget(st.name,S.subject,it.item,'lvl')!=='';}).length;
+    var n=d.students.filter(function(st){return it.grade ? val('acad',st.name,S.subject)!=='' : it.kind==='text' ? String(dget(st.name,S.subject,it.item,'note')).trim()!=='' : dget(st.name,S.subject,it.item,'lvl')!=='';}).length;
     h+='<button class="chip'+(i===S.si?' on':'')+'" data-si="'+i+'">'+esc(it.label)+(n?'<span class="n">'+n+'/'+d.students.length+'</span>':'')+'</button>';
   });
   h+='</div></div>';
@@ -580,32 +630,42 @@ function gradesView(){
     h+='<div class="bar"><span>علامات <b>'+esc(S.subject)+'</b> من 100</span><span class="grow"></span><span>'+done+' من '+d.students.length+'</span></div><div class="list">';
     d.students.forEach(function(st,i){
       var v=val('acad',st.name,S.subject);
+      if(v!=='') S.open[st.name+'|'+dk(S.subject,it.item)]=true;   // a grade always shows its note box
       h+='<div class="row'+(v!==''?' done':'')+'"><div class="nm"><b>'+esc(st.name)+'</b></div>'+
          '<input class="grade" type="number" inputmode="decimal" min="0" max="100" step="0.5" data-g="'+i+'" value="'+esc(v)+'" placeholder="—">'+
          noteBtn(st.name,it.item,i)+noteRow(st.name,it.item,i)+'</div>';
     });
-    return h+'</div><div class="legend">اترك خانة الطالب فارغة إن لم تكن له علامة هذا الشهر. زر ✎ لكتابة ملاحظة على العلامة (اختياري).</div>';
+    return h+'</div><div class="legend">اترك خانة الطالب فارغة إن لم تكن له علامة هذا الشهر. <b>الملاحظة إجبارية مع كل علامة</b> (سبب العلامة أو ما يحتاجه الطالب).</div>';
   }
-  var done2=d.students.filter(function(st){return dget(st.name,S.subject,it.item,'lvl')!=='';}).length;
+  if(it.kind==='text'){
+    var done3=d.students.filter(function(st){return String(dget(st.name,S.subject,it.item,'note')).trim()!=='';}).length;
+    h+='<div class="bar"><span><b>'+esc(S.subject)+' — '+esc(it.label)+'</b></span><span class="grow"></span><span>'+done3+' من '+d.students.length+'</span></div><div class="list">';
+    d.students.forEach(function(st,i){ var v=dget(st.name,S.subject,it.item,'note');
+      h+='<div class="row'+(String(v).trim()!==''?' done':'')+'"><div class="nm"><b>'+esc(st.name)+'</b></div><textarea class="t" data-n="'+i+'" placeholder="اكتب فقط لمن لاحظت عليه شيئًا">'+esc(v)+'</textarea></div>'; });
+    return h+'</div><div class="legend">اكتب للطلاب الذين لاحظت عليهم شيئًا فقط، واترك الباقين فارغين.</div>';
+  }
+  var four=it.kind==='rate4', done2=d.students.filter(function(st){return dget(st.name,S.subject,it.item,'lvl')!=='';}).length;
   h+='<div class="bar"><span><b>'+esc(S.subject)+' — '+esc(it.label)+'</b></span><span class="grow"></span><span>'+done2+' من '+d.students.length+'</span>'+
-     '<button class="fill" data-dfill="4">عبّئ الفارغ بـ 4</button></div><div class="list">';
+     (four?'':'<button class="fill" data-dfill="4">عبّئ الفارغ بـ 4</button>')+'</div><div class="list">';
   d.students.forEach(function(st,i){
     var v=dget(st.name,S.subject,it.item,'lvl');
-    h+='<div class="row'+(v!==''?' done':'')+'"><div class="nm"><b>'+esc(st.name)+'</b></div><div class="sc">';
-    for(var k=1;k<=5;k++) h+='<button data-dr="'+i+'" data-v="'+k+'"'+(String(v)===String(k)?' class="on"':'')+'>'+k+'</button>';
+    h+='<div class="row'+(v!==''?' done':'')+(four?' wrap4':'')+'"><div class="nm"><b>'+esc(st.name)+'</b></div><div class="sc'+(four?' four':'')+'">';
+    for(var k=1;k<=5;k++) h+='<button data-dr="'+i+'" data-v="'+k+'"'+(String(v)===String(k)?' class="on"':'')+'>'+(four?'<span>'+RATEW[k-1]+'</span><small>'+k+'</small>':k)+'</button>';
     h+='</div>'+noteBtn(st.name,it.item,i)+noteRow(st.name,it.item,i)+'</div>';
   });
-  return h+'</div><div class="legend">1 لم يتقن · 2 ضعيف · 3 متوسط · 4 جيد · 5 متقن تمامًا — اضغط الرقم مرة أخرى لإلغائه. ✎ ملاحظة اختيارية.</div>';
+  return h+'</div><div class="legend">'+(four?'مقياس خماسي: يحتاج تدريب 1 · مقبول 2 · جيد 3 · جيد جدًا 4 · ممتاز 5 — اضغط التقدير مرة أخرى لإلغائه. ✎ ملاحظة اختيارية.':'1 لم يتقن · 2 ضعيف · 3 متوسط · 4 جيد · 5 متقن تمامًا — اضغط الرقم مرة أخرى لإلغائه. ✎ ملاحظة اختيارية.')+'</div>';
 }
 
 function eduGroups(){
-  var d=S.data, g=d.domains.map(function(x){return {label:x.name.replace('الجانب ',''), items:x.items.map(function(it){return {key:it,label:it,type:'rate'};})};});
-  g.push({label:'تحسّن الصفة', items:[{key:d.trait.score,label:'تحسّن الصفة التي تحتاج علاجًا',type:'rate',trait:true},{key:d.trait.note,label:'ملاحظة عن الصفة',type:'text',trait:true}]});
+  var d=S.data, prof=S.allItems?{}:((d.profiles||{})[S.subject]||{});
+  var g=d.domains.filter(function(x){ return !prof.edu || prof.edu.indexOf(x.name)>=0; }).map(function(x){return {label:x.name.replace('الجانب ',''), items:x.items.map(function(it){return {key:it,label:it,type:'rate'};})};});
+  if(!prof.edu) g.push({label:'تحسّن الصفة', items:[{key:d.trait.score,label:'تحسّن الصفة التي تحتاج علاجًا',type:'rate',trait:true},{key:d.trait.note,label:'ملاحظة عن الصفة',type:'text',trait:true}]});
   g.push({label:'ملاحظات', items:NOTES.map(function(n){return {key:n.key,label:n.label,type:'text'};})});
   return g;
 }
 function eduView(){
-  var g=eduGroups(), h='<div class="sub"><div class="lbl">الجانب</div><div class="chips">';
+  var g=eduGroups(), h=subjPick()+'<div class="sub"><div class="lbl">الجانب</div><div class="chips">';
+  if(S.group>=g.length) S.group=0;
   g.forEach(function(x,i){h+='<button class="chip'+(i===S.group?' on':'')+'" data-grp="'+i+'">'+esc(x.label)+'</button>';});
   h+='</div></div>';
   var items=g[S.group].items;
@@ -619,16 +679,16 @@ function ratingView(items,mode){
   var h='<div class="sub"><div class="lbl">'+(mode==='quick'?'البند':'البند داخل الجانب')+'</div><div class="chips">';
   items.forEach(function(it,i){
     var sh=itemSheet(it,mode);
-    var n=d.students.filter(function(st){return val(sh,st.name,it.key)!=='';}).length;
+    var n=d.students.filter(function(st){return iv(it,sh,st.name)!=='';}).length;
     h+='<button class="chip'+(i===idx?' on':'')+'" data-it="'+i+'">'+esc(it.label)+(n?'<span class="n">'+n+'/'+d.students.length+'</span>':'')+'</button>';
   });
   h+='</div></div>';
-  var it=items[idx], sh=itemSheet(it,mode), done=d.students.filter(function(st){return val(sh,st.name,it.key)!=='';}).length;
+  var it=items[idx], sh=itemSheet(it,mode), done=d.students.filter(function(st){return iv(it,sh,st.name)!=='';}).length;
   h+='<div class="bar"><span><b>'+esc(it.label)+'</b></span><span class="grow"></span><span>'+done+' من '+d.students.length+'</span>';
   if(it.type!=='text') h+='<button class="fill" data-fill="4">عبّئ الفارغ بـ 4</button>';
   h+='</div><div class="list">';
   d.students.forEach(function(st,i){
-    var v=val(sh,st.name,it.key), sub='';
+    var v=iv(it,sh,st.name), sub='';
     if(it.trait) sub = st.worst ? '<i>'+esc(st.worst)+'</i>' : '<i class="none">لم تُسجَّل صفة</i>';
     h+='<div class="row'+(v!==''?' done':'')+'"><div class="nm"><b>'+esc(st.name)+'</b>'+sub+'</div>';
     if(it.type==='text') h+='<textarea class="t" data-t="'+i+'" placeholder="اختياري">'+esc(v)+'</textarea>';
@@ -644,13 +704,14 @@ function val(sheet,name,key){ var o=S[sheet][name]; return o && o[key]!==undefin
 function put(sheet,name,key,v){ if(!S[sheet][name]) S[sheet][name]={}; S[sheet][name][key]=v; setDirty(true); }
 
 function currentItem(){
-  if(S.tab==='quick'){ var q=S.data.quick[S.quick]; return {it:q, sh:q.sheet}; }
+  if(S.tab==='quick'){ var q=quickItems()[S.quick]; return {it:q, sh:q.sheet}; }
   var it=eduGroups()[S.group].items[S.item]; return {it:it, sh:'edu'};
 }
 function bind(){
   document.getElementById('back').onclick=function(){ leave(goHome); };
   app.querySelectorAll('[data-tab]').forEach(function(b){b.onclick=function(){S.tab=b.getAttribute('data-tab'); render();};});
-  app.querySelectorAll('[data-sub]').forEach(function(b){b.onclick=function(){S.subject=b.getAttribute('data-sub'); S.si=0; render();};});
+  app.querySelectorAll('[data-sub]').forEach(function(b){b.onclick=function(){S.subject=b.getAttribute('data-sub'); S.si=0; S.quick=0; S.item=0; S.allItems=false; store('albaraem_subj|'+S.teacher+'|'+S.cls,S.subject); render();};});
+  var ab=app.querySelector('[data-all]'); if(ab) ab.onclick=function(){ S.allItems=!S.allItems; S.quick=0; S.group=0; S.item=0; render(); };
   app.querySelectorAll('[data-si]').forEach(function(b){b.onclick=function(){S.si=+b.getAttribute('data-si'); keep(render);};});
   app.querySelectorAll('[data-grp]').forEach(function(b){b.onclick=function(){S.group=+b.getAttribute('data-grp'); S.item=0; render();};});
   app.querySelectorAll('[data-it]').forEach(function(b){b.onclick=function(){ if(S.tab==='quick') S.quick=+b.getAttribute('data-it'); else S.item=+b.getAttribute('data-it'); render();};});
@@ -659,7 +720,9 @@ function bind(){
       var st=S.data.students[+inp.getAttribute('data-g')], v=inp.value.trim(), n=Number(v);
       var bad = (inp.validity && inp.validity.badInput) || (v!=='' && (isNaN(n)||n<0||n>100));
       inp.classList.toggle('bad',bad);
-      if(!bad){ put('acad',st.name,S.subject, v===''?'':n); inp.parentNode.classList.toggle('done',v!==''); }
+      if(!bad){ put('acad',st.name,S.subject, v===''?'':n); inp.parentNode.classList.toggle('done',v!=='');
+        var gi=inp.getAttribute('data-g');
+        if(v!=='' && !app.querySelector('[data-n="'+gi+'"]')){ keep(render); var g2=app.querySelector('[data-g="'+gi+'"]'); if(g2){ g2.focus(); } } }
     };
   });
   var items = S.tab==='grades' && S.subject ? subItems() : null;
@@ -684,8 +747,8 @@ function bind(){
   app.querySelectorAll('[data-r]').forEach(function(b){
     b.onclick=function(){
       var st=S.data.students[+b.getAttribute('data-r')], c=currentItem(), v=+b.getAttribute('data-v');
-      var cur=val(c.sh,st.name,c.it.key);
-      put(c.sh,st.name,c.it.key, String(cur)===String(v) ? '' : v);
+      var cur=iv(c.it,c.sh,st.name);
+      ip(c.it,c.sh,st.name, String(cur)===String(v) ? '' : v);
       keep(render);
     };
   });
@@ -695,7 +758,7 @@ function bind(){
   var f=app.querySelector('[data-fill]');
   if(f) f.onclick=function(){
     var c=currentItem(), v=+f.getAttribute('data-fill');
-    S.data.students.forEach(function(st){ if(c.it.trait && !st.worst) return; if(val(c.sh,st.name,c.it.key)==='') put(c.sh,st.name,c.it.key,v); });
+    S.data.students.forEach(function(st){ if(c.it.trait && !st.worst) return; if(iv(c.it,c.sh,st.name)==='') ip(c.it,c.sh,st.name,v); });
     keep(render);
   };
 }
@@ -722,20 +785,97 @@ function diffDet(){
   });
   return out;
 }
+/* Instant save: the change is kept on the phone first (outbox) and sent in the background, in order, with retries.
+   The teacher never waits for the server; a save that has not arrived yet is shown in a strip and resent automatically. */
+var obDone={};   // when a save last reached the file, per teacher|month|class (a class load older than that is thrown away)
+function obGet(){ return jget('albaraem_outbox')||[]; }
+function obSet(a){ jput('albaraem_outbox',a); obStrip(); }
+function obCount(){ return obGet().length; }
+function obStrip(){
+  var a=obGet(), el=document.getElementById('obStrip');
+  if(!el){ el=document.createElement('div'); el.id='obStrip'; el.className='obstrip'; el.onclick=function(){ var e=obGet()[0];
+    if(e && e.err && !confirm('هذا الحفظ لم يُقبل:\n'+e.err+'\n\nموافق = أعد المحاولة الآن\nإلغاء = خيارات أخرى')){
+      if(confirm('هل تريد حذف هذا الحفظ من الهاتف نهائيًا؟ لن تصل تغييراته إلى الملف.')){ var b=obGet(); b.shift(); obSet(b); obFlush(); }
+      return; }
+    obFlush(true); }; document.body.appendChild(el); }
+  if(!a.length){ if(!obStrip.note) el.style.display='none'; return; }
+  var err=a.filter(function(x){return x.err;})[0];
+  el.style.display='block';
+  el.className='obstrip'+(err?' bad':'');
+  el.innerHTML = err ? '⚠️ حفظ لم يُقبل: '+esc(err.err)+' <u>اضغط للمحاولة</u>' :
+    (obFlush.on ? '⏳ يُرسل الحفظ… ('+a.length+')' : '⏳ '+a.length+' حفظ بانتظار الإنترنت — يُرسل تلقائيًا <u>أرسل الآن</u>');
+}
+function obFlush(force){
+  if(obFlush.on) return;
+  var a=obGet(); if(!a.length){ obStrip(); return; }
+  var x=a[0];
+  if(x.err && !force){ obStrip(); return; }
+  obFlush.on=true; obStrip();
+  var px=JSON.parse(JSON.stringify(x.p)); px.sid=x.id;
+  call('webSave',[px],function(r){
+    obFlush.on=false; obDone[x.p.teacher+'|'+x.p.month+'|'+x.p.cls]=Date.now();
+    var b=obGet(); if(b.length && b[0].id===x.id) b.shift(); obSet(b);
+    if(r && r.rejected) obNote('⚠️ '+r.rejected+' قيمة لم تُقبل في '+x.p.cls+' (خارج المدى)', 6000);
+    else if(!b.length) obNote('✓ وصل الحفظ إلى الملف', 1800);
+    if(b.length) setTimeout(function(){ obFlush(); },50);
+  },function(m){
+    obFlush.on=false;
+    var b=obGet(), net=!/رمز الدخول|لا يوجد رمز|شهر غير معروف|صف غير معروف|غير موجود/.test(m||'');   // only these can never succeed
+    if(b.length && b[0].id===x.id){ b[0].n=(b[0].n||0)+1; if(!net) b[0].err=m||'خطأ'; else delete b[0].err; }
+    obSet(b);
+    if(net) setTimeout(function(){ obFlush(); }, Math.min(60000, 4000*Math.pow(2,Math.min(4,(b[0]&&b[0].n)||1))));
+  },true);
+}
+function obNote(m,ms){ obStrip(); var el=document.getElementById('obStrip'); obStrip.note=true; el.className='obstrip ok'; el.style.display='block'; el.textContent=m;
+  clearTimeout(obNote.t); obNote.t=setTimeout(function(){ obStrip.note=false; obStrip(); }, ms||2000); }
+window.addEventListener('online',function(){ obFlush(true); });
+/** A class loaded from the server, with this phone's not-yet-sent changes applied on top. */
+function withPending(d,cls){
+  obGet().forEach(function(x){ var p=x.p; if(p.teacher!==S.teacher||p.month!==S.month||p.cls!==cls) return;
+    ['acad','edu'].forEach(function(sh){ Object.keys(p[sh]||{}).forEach(function(n){ var o=d[sh][n]=d[sh][n]||{}; Object.keys(p[sh][n]).forEach(function(k){ o[k]=p[sh][n][k]; }); }); });
+    Object.keys(p.det||{}).forEach(function(n){ var o=d.det[n]=d.det[n]||{}; Object.keys(p.det[n]).forEach(function(k){ var c=o[k]=o[k]||{lvl:'',note:''}; Object.keys(p.det[n][k]).forEach(function(f){ c[f]=p.det[n][k][f]; }); }); });
+  });
+  return d;
+}
+/** A grade out of 100 that was entered or changed needs a note (why this grade). Returns the first student missing one. */
+function missingGradeNote(){
+  var d=S.data, miss=null;
+  d.subjects.some(function(sub){ return d.students.some(function(st){
+    var g=val('acad',st.name,sub), g0=((S.orig.acad[st.name]||{})[sub]); g0=g0==null?'':g0;
+    if(g===''||String(g)===String(g0)) return false;
+    if(String(dget(st.name,sub,d.gradeItem,'note')).trim()!=='') return false;
+    miss={sub:sub, st:st}; return true; }); });
+  return miss;
+}
 function saveClass(){
+  var mg=missingGradeNote();
+  if(mg){
+    S.tab='grades'; S.subject=mg.sub; S.si=0; var k=mg.st.name+'|'+dk(mg.sub,S.data.gradeItem); S.open[k]=true; render();
+    var i=S.data.students.indexOf(mg.st), t=app.querySelector('[data-n="'+i+'"]'); if(t){ t.classList.add('need'); t.scrollIntoView({block:'center'}); t.focus(); }
+    status('err','الملاحظة إجبارية مع كل علامة: اكتب ملاحظة لـ '+mg.st.name+' في '+mg.sub+' ثم احفظ.');
+    return;
+  }
   var p={teacher:S.teacher,pin:S.pin,month:S.month,cls:S.cls,acad:diff('acad'),edu:diff('edu'),det:diffDet()};
   if(!Object.keys(p.acad).length && !Object.keys(p.edu).length && !Object.keys(p.det).length){ setDirty(false); return; }
-  call('webSave',[p],function(r){
-    S.orig={acad:clone(S.acad),edu:clone(S.edu),det:clone(S.det)}; S.dirty=false;
-    var ck=hkey()+'|'+S.cls; if(S.classes[ck]){ S.classes[ck].acad=clone(S.acad); S.classes[ck].edu=clone(S.edu); S.classes[ck].det=clone(S.det); }
-    var h=S.homes[hkey()]; if(h && !h.classes.some(function(x){return x.cls===S.cls;})){
-      h.classes.push({cls:S.cls, n:r.students, parts:[Object.keys(S.acad).length>0, Object.keys(S.edu).length>0, Object.keys(S.det).length>0]});
-      var order=S.boot.classes; h.classes.sort(function(a,b){return order.indexOf(a.cls)-order.indexOf(b.cls);});
-    }
-    document.getElementById('saveBtn').disabled=true;
-    if(r.rejected) status('err','حُفظ '+r.students+' طالبًا، لكن '+r.rejected+' قيمة لم تُقبل (خارج المدى). راجع الخانات الحمراء.');
-    else status('ok','تم الحفظ ✓ ('+r.students+' طالبًا) — يمكنك التعديل والحفظ مرة أخرى');
-  });
+  var id=Date.now().toString(36)+Math.random().toString(36).slice(2,7), a=obGet(); a.push({id:id, p:p, at:Date.now(), n:0}); obSet(a);
+  if(!obGet().some(function(x){ return x.id===id; })){          // storage full or blocked: wait for the server instead
+    var pd=JSON.parse(JSON.stringify(p)); pd.sid=id;
+    call('webSave',[pd],function(r){ savedLocal(); if(r.rejected) status('err','حُفظ، لكن '+r.rejected+' قيمة لم تُقبل. راجع الخانات.'); else status('ok','تم الحفظ ✓'); });
+    return;
+  }
+  savedLocal();
+  status('ok','تم الحفظ ✓ — يُرسل إلى الملف في الخلفية، ويمكنك المتابعة فورًا');
+  obFlush();
+}
+function savedLocal(){
+  S.orig={acad:clone(S.acad),edu:clone(S.edu),det:clone(S.det)}; S.dirty=false;
+  var ck=hkey()+'|'+S.cls; if(S.classes[ck]){ S.classes[ck].acad=clone(S.acad); S.classes[ck].edu=clone(S.edu); S.classes[ck].det=clone(S.det); }
+  var names={}; ['acad','edu','det'].forEach(function(sh){ Object.keys(S[sh]).forEach(function(n){ names[n]=true; }); });
+  var h=S.homes[hkey()]; if(h && !h.classes.some(function(x){return x.cls===S.cls;})){
+    h.classes.push({cls:S.cls, n:Object.keys(names).length, parts:[Object.keys(S.acad).length>0, Object.keys(S.edu).length>0, Object.keys(S.det).length>0]});
+    var order=S.boot.classes; h.classes.sort(function(a,b){return order.indexOf(a.cls)-order.indexOf(b.cls);});
+  }
+  document.getElementById('saveBtn').disabled=true;
 }
 
 // ---------------------------------------------------------------- supervisors: lesson visit
