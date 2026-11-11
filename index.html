@@ -39,7 +39,7 @@ header.top .who a{color:#fff;opacity:.85;cursor:pointer;text-decoration:underlin
 .card h2{font-size:15px;margin:0 0 12px;color:var(--brand);display:flex;align-items:center;gap:8px}
 .card h2 .grow{flex:1}
 label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
-select,input[type=password],input[type=text],input[type=date]{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+select,input[type=password],input[type=text],input[type=date],.grid2 input[type=number]{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
 .btn{border:0;border-radius:10px;padding:12px 16px;background:var(--brand2);color:#fff;font-weight:600;cursor:pointer}
 .btn:disabled{opacity:.5;cursor:default}
 .btn.ghost{background:#fff;color:var(--brand2);border:1px solid var(--brand2)}
@@ -99,6 +99,7 @@ textarea.need{border-color:#d9534f;box-shadow:0 0 0 3px rgba(217,83,79,.15)}
 .trow{display:flex;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}
 .trow:first-child{border-top:0}
 .trow .lab{flex:1;min-width:170px;font-size:14px}
+.trow .lab .nb{height:26px;padding:0 7px;margin-inline-start:6px;vertical-align:middle;font-size:12px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
 footer.save{position:fixed;bottom:0;inset-inline:0;background:rgba(255,255,255,.96);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));backdrop-filter:blur(6px);z-index:10}
 footer.save .in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:12px}
@@ -162,7 +163,7 @@ footer.save .st.err{color:var(--warn);font-weight:600}
 var S = {boot:null, teacher:'', pin:'', month:'', sup:false, view:'login', home:null,
          cls:'', data:null, tab:'grades', subject:'', si:0, quick:0, group:0, item:0,
          acad:{}, edu:{}, det:{}, orig:{acad:{}, edu:{}, det:{}}, open:{}, dirty:false,
-         vinit:null, v:null, vItem:0, homes:{}, classes:{}, att:null, tk:null, tg:null};
+         vinit:null, v:null, vItem:0, homes:{}, classes:{}, att:null, tk:null, tg:null, asSup:false, finit:null, f:null};
 var app = document.getElementById('app');
 var NOTES = [{key:'أبرز ما تحسّن', label:'أبرز ما تحسّن'}, {key:'ما يحتاج متابعة', label:'ما يحتاج متابعة'}];
 var LEAVE = 'لديك تغييرات غير محفوظة. هل تريد المتابعة دون حفظ؟';
@@ -294,7 +295,7 @@ function goHome(){
   else homeFetch(true,undefined,true);
 }
 function renderHome(){
-  S.view='home'; who(); setTimeout(prefetchClasses, 600); setTimeout(obFlush, 300);
+  S.view='home'; S.asSup=false; who(); setTimeout(prefetchClasses, 600); setTimeout(obFlush, 300);
   document.getElementById('savebar').style.display='none';
   var h=S.home, done={}, html=installCard()+attCard()+rolesCard()+'<div class="card"><h2>تقييماتي الشهرية</h2>'+
     '<div class="mrow"><span>الشهر</span><select id="hMonth">'+S.boot.months.map(function(m){return '<option value="'+esc(m)+'"'+(m===S.month?' selected':'')+'>'+esc(m)+'</option>';}).join('')+'</select></div>';
@@ -322,11 +323,30 @@ function renderHome(){
       });
       html+='</div>';
     } else html+='<div class="hint" style="margin-top:0">لا توجد زيارات مسجّلة باسمك بعد.</div>';
-    html+='<div class="hint">بعد كل حصة تحضرها: قيّم أداء المعلم/ة، ثم قيّم الطلاب سريعًا. متوسط زياراتك في الشهر يدخل في مؤشرات الطلاب كمقيِّم إضافي.</div></div>';
+    html+='<div class="hint">بعد كل حصة تحضرها: قيّم أداء المعلم/ة، ثم قيّم الطلاب سريعًا. تقييمات زياراتك تظهر في بطاقة الطالب ضمن قسم المشرفين.</div></div>';
+  }
+  if(S.sup && h.supClasses){   // a server older than V10 does not send these: the cards stay hidden
+    var sd={}; h.supClasses.forEach(function(x){ sd[x.cls]=x.n; });
+    html+='<div class="card"><h2>تقييمي التربوي الشهري (مشرف)</h2><div class="hint" style="margin-top:0">تقييمك للطلاب باسمك، بلا مادة. يظهر في بطاقة الطالب منفصلًا عن المعلمين.</div><div class="chips">';
+    S.boot.classes.forEach(function(c){ html+='<button class="chip'+(sd[c]?' done':'')+'" data-sopen="'+esc(c)+'">'+esc(c)+(sd[c]?' ✓ '+sd[c]:'')+'</button>'; });
+    html+='</div></div>';
+  }
+  if(S.sup && h.fams){
+    html+='<div class="card"><h2>مقابلات الأهالي<span class="grow"></span><button class="btn sm" id="newF">＋ مقابلة جديدة</button></h2>';
+    if(h.fams.length){
+      html+='<div class="list">';
+      h.fams.slice(0,12).forEach(function(f){ html+='<div class="row"><div class="nm"><b>'+esc(f.student)+'</b><small>'+esc(f.cls)+' · '+esc(f.month)+'</small></div>'+
+        '<button class="btn ghost sm" data-fam="'+esc(f.student)+'" data-fm="'+esc(f.month)+'" data-fc="'+esc(f.cls)+'">تعديل</button></div>'; });
+      html+='</div>';
+    } else html+='<div class="hint" style="margin-top:0">لا توجد مقابلات مسجّلة باسمك بعد.</div>';
+    html+='<div class="hint">بعد كل مقابلة مع الأهل: قيّم تفاعل الأسرة واكتب ما اتُّفق عليه. لصف التمهيدي تُكتب أيضًا أحسن صفة وأسوأ صفة للطفل.</div></div>';
   }
   app.innerHTML=html;
   app.querySelectorAll('[data-open]').forEach(function(b){ b.onclick=function(){ openClass(b.getAttribute('data-open')); }; });
   app.querySelectorAll('[data-visit]').forEach(function(b){ b.onclick=function(){ openVisit(b.getAttribute('data-visit')); }; });
+  app.querySelectorAll('[data-sopen]').forEach(function(b){ b.onclick=function(){ openClass(b.getAttribute('data-sopen'),true); }; });
+  app.querySelectorAll('[data-fam]').forEach(function(b){ b.onclick=function(){ openFam({student:b.getAttribute('data-fam'),month:b.getAttribute('data-fm'),cls:b.getAttribute('data-fc')}); }; });
+  var nf=document.getElementById('newF'); if(nf) nf.onclick=function(){ openFam(null); };
   var nv=document.getElementById('newV'); if(nv) nv.onclick=function(){ openVisit(''); };
   document.getElementById('hMonth').onchange=function(){ S.month=this.value; goHome(); };
   bindInstall(); bindAtt(); bindRoles();
@@ -524,18 +544,21 @@ function bindInstall(){
 }
 
 // ---------------------------------------------------------------- monthly class evaluation
-function openClass(c){
-  var ck=hkey()+'|'+c;
+function clsKey(c,sup){ return hkey()+'|'+(sup?'sup|':'')+c; }
+function openClass(c,sup){
+  S.asSup=!!sup; sup=S.asSup;
+  var ck=clsKey(c,sup);
   function show(d){
     S.cls=c; S.data=d; S.acad=clone(d.acad); S.edu=clone(d.edu); S.det=clone(d.det);
     S.orig={acad:clone(d.acad),edu:clone(d.edu),det:clone(d.det)}; S.open={};
     var rs=store('albaraem_subj|'+S.teacher+'|'+c); S.subject=(rs && d.subjects.indexOf(rs)>=0)? rs : (d.subjects[0]||''); S.si=0; S.quick=0; S.group=0; S.item=0; S.allItems=false;
     if(S.tab!=='grades'&&S.tab!=='quick'&&S.tab!=='edu') S.tab='grades';
+    if(sup){ S.tab='edu'; S.subject=''; }
     S.view='class'; setDirty(false); render();
   }
   if(S.classes[ck]){ show(S.classes[ck]); return; }   // only this teacher writes these rows, so the session copy stays right
-  var t0=Date.now(), dk0=S.teacher+'|'+S.month+'|'+c;
-  call('webLoadClass',[S.teacher,S.pin,S.month,c],function(d){ if(obDone[dk0]>t0){ openClass(c); return; } d=withPending(d,c); S.classes[ck]=d; show(d); });
+  var t0=Date.now(), dk0=S.teacher+'|'+S.month+'|'+(sup?'sup|':'')+c;
+  call('webLoadClass',[S.teacher,S.pin,S.month,c].concat(sup?['sup']:[]),function(d){ if(obDone[dk0]>t0){ openClass(c,sup); return; } d=withPending(d,c,sup); S.classes[ck]=d; show(d); });
 }
 /** After the home page: load the classes the teacher already works on in the background, one at a time, so «تعديل» opens at once. */
 function prefetchClasses(){
@@ -548,7 +571,7 @@ function prefetchClasses(){
     var c=list.shift();
     if(S.classes[k+'|'+c]){ next(); return; }
     var t0=Date.now(), dk0=S.teacher+'|'+S.month+'|'+c;
-    call('webLoadClass',[S.teacher,S.pin,S.month,c],function(d){ if(hkey()===k && !S.classes[k+'|'+c] && !(obDone[dk0]>t0)) S.classes[k+'|'+c]=withPending(d,c); next(); },function(){ prefetchClasses.on=false; },true);
+    call('webLoadClass',[S.teacher,S.pin,S.month,c],function(d){ if(hkey()===k && !S.classes[k+'|'+c] && !(obDone[dk0]>t0)) S.classes[k+'|'+c]=withPending(d,c,false); next(); },function(){ prefetchClasses.on=false; },true);
   })();
 }
 function hasPrev(){ var o=S.orig; return Object.keys(o.acad).length||Object.keys(o.edu).length||Object.keys(o.det).length; }
@@ -559,10 +582,11 @@ function render(){
   document.getElementById('saveBtn').textContent='حفظ';
   var d=S.data;
   var h='<div class="card" style="padding:12px 14px"><div class="bar" style="margin:0">'+
-    '<b style="color:var(--brand);font-size:16px">'+esc(S.cls)+'</b><span>'+d.students.length+' طالبًا</span>'+
+    '<b style="color:var(--brand);font-size:16px">'+esc(S.cls)+(S.asSup?' — تقييم المشرف':'')+'</b><span>'+d.students.length+' طالبًا</span>'+
     '<span class="grow"></span><button class="fill" id="back">رجوع</button></div>'+
     (hasPrev()?'<div class="banner">وضع التعديل: تظهر تقييماتك المحفوظة سابقًا لهذا الشهر. عدّل ما تريد ثم اضغط «حفظ» — يتحدّث سجلك نفسه ولا يُضاف ردّ جديد.</div>':'')+'</div>';
-  h+='<div class="tabs">'+tabBtn('grades','المواد')+tabBtn('quick','السلوك في الحصة')+tabBtn('edu','التقييم التربوي')+'</div>';
+  if(S.asSup) h+='<div class="banner">تقييمك الشهري بصفتك مشرفًا (بلا مادة). يُحفظ باسم «مشرف: '+esc(S.teacher)+'» ويظهر في بطاقة الطالب منفصلًا عن متوسط المعلمين.</div>';
+  h+='<div class="tabs">'+(S.asSup ? tabBtn('edu','التقييم التربوي') : tabBtn('grades','المواد')+tabBtn('quick','الأداء في الحصة')+tabBtn('edu','التقييم التربوي'))+'</div>';
   if(!d.students.length) h+='<div class="card empty">لا يوجد طلاب مسجّلون في هذا الصف.</div>';
   else if(S.tab==='grades') h+=gradesView();
   else if(S.tab==='quick'){ h+=subjPick(); var qi=quickItems(); if(S.quick>=qi.length) S.quick=0; h+= qi.length? ratingView(qi,'quick') : '<div class="card empty">لا توجد بنود سلوك لهذه المادة.</div>'; }
@@ -627,7 +651,8 @@ function gradesView(){
   var it=items[S.si];
   if(it.grade){
     var done=d.students.filter(function(st){return val('acad',st.name,S.subject)!=='';}).length;
-    h+='<div class="bar"><span>علامات <b>'+esc(S.subject)+'</b> من 100</span><span class="grow"></span><span>'+done+' من '+d.students.length+'</span></div><div class="list">';
+    h+='<div class="bar"><span>علامات <b>'+esc(S.subject)+'</b> من 100</span><span class="grow"></span><span>'+done+' من '+d.students.length+'</span></div>'+
+      '<div class="hint" style="margin:0 0 8px">اكتب العلامة <b>من 100</b> دائمًا: إذا صحّحت من 10 أو 20 فحوّلها (8 من 10 = 80، 15 من 20 = 75).</div><div class="list">';
     d.students.forEach(function(st,i){
       var v=val('acad',st.name,S.subject);
       if(v!=='') S.open[st.name+'|'+dk(S.subject,it.item)]=true;   // a grade always shows its note box
@@ -813,7 +838,7 @@ function obFlush(force){
   obFlush.on=true; obStrip();
   var px=JSON.parse(JSON.stringify(x.p)); px.sid=x.id;
   call('webSave',[px],function(r){
-    obFlush.on=false; obDone[x.p.teacher+'|'+x.p.month+'|'+x.p.cls]=Date.now();
+    obFlush.on=false; obDone[x.p.teacher+'|'+x.p.month+'|'+(x.p.as==='sup'?'sup|':'')+x.p.cls]=Date.now();
     var b=obGet(); if(b.length && b[0].id===x.id) b.shift(); obSet(b);
     if(r && r.rejected) obNote('⚠️ '+r.rejected+' قيمة لم تُقبل في '+x.p.cls+' (خارج المدى)', 6000);
     else if(!b.length) obNote('✓ وصل الحفظ إلى الملف', 1800);
@@ -830,8 +855,8 @@ function obNote(m,ms){ obStrip(); var el=document.getElementById('obStrip'); obS
   clearTimeout(obNote.t); obNote.t=setTimeout(function(){ obStrip.note=false; obStrip(); }, ms||2000); }
 window.addEventListener('online',function(){ obFlush(true); });
 /** A class loaded from the server, with this phone's not-yet-sent changes applied on top. */
-function withPending(d,cls){
-  obGet().forEach(function(x){ var p=x.p; if(p.teacher!==S.teacher||p.month!==S.month||p.cls!==cls) return;
+function withPending(d,cls,sup){
+  obGet().forEach(function(x){ var p=x.p; if(p.teacher!==S.teacher||p.month!==S.month||p.cls!==cls||(p.as==='sup')!==!!sup) return;
     ['acad','edu'].forEach(function(sh){ Object.keys(p[sh]||{}).forEach(function(n){ var o=d[sh][n]=d[sh][n]||{}; Object.keys(p[sh][n]).forEach(function(k){ o[k]=p[sh][n][k]; }); }); });
     Object.keys(p.det||{}).forEach(function(n){ var o=d.det[n]=d.det[n]||{}; Object.keys(p.det[n]).forEach(function(k){ var c=o[k]=o[k]||{lvl:'',note:''}; Object.keys(p.det[n][k]).forEach(function(f){ c[f]=p.det[n][k][f]; }); }); });
   });
@@ -847,6 +872,14 @@ function missingGradeNote(){
     miss={sub:sub, st:st}; return true; }); });
   return miss;
 }
+/** A subject whose new or changed grades (3 or more) are all 25 or less: probably written out of 10/20/25, not 100. */
+function lowGrades(){
+  var d=S.data, hit='';
+  d.subjects.some(function(sub){ var vals=[];
+    d.students.forEach(function(st){ var g=val('acad',st.name,sub), g0=(S.orig.acad[st.name]||{})[sub]; if(g!=='' && String(g)!==String(g0==null?'':g0)) vals.push(Number(g)); });
+    if(vals.length>=3 && Math.max.apply(null,vals)<=25){ hit=sub; return true; } return false; });
+  return hit;
+}
 function saveClass(){
   var mg=missingGradeNote();
   if(mg){
@@ -855,7 +888,11 @@ function saveClass(){
     status('err','الملاحظة إجبارية مع كل علامة: اكتب ملاحظة لـ '+mg.st.name+' في '+mg.sub+' ثم احفظ.');
     return;
   }
+  var low=S.asSup?'':lowGrades();
+  if(low && !confirm('العلامات التي أدخلتها في «'+low+'» كلها 25 أو أقل.\nالعلامة يجب أن تكون من 100 (مثلًا 8 من 10 تُكتب 80).\n\nموافق = العلامات فعلًا من 100، احفظ\nإلغاء = أرجع لأعدّلها')){
+    S.tab='grades'; S.subject=low; S.si=0; render(); status('err','عدّل العلامات لتكون من 100 ثم احفظ.'); return; }
   var p={teacher:S.teacher,pin:S.pin,month:S.month,cls:S.cls,acad:diff('acad'),edu:diff('edu'),det:diffDet()};
+  if(S.asSup){ p.as='sup'; p.acad={}; p.det={}; }
   if(!Object.keys(p.acad).length && !Object.keys(p.edu).length && !Object.keys(p.det).length){ setDirty(false); return; }
   var id=Date.now().toString(36)+Math.random().toString(36).slice(2,7), a=obGet(); a.push({id:id, p:p, at:Date.now(), n:0}); obSet(a);
   if(!obGet().some(function(x){ return x.id===id; })){          // storage full or blocked: wait for the server instead
@@ -869,9 +906,12 @@ function saveClass(){
 }
 function savedLocal(){
   S.orig={acad:clone(S.acad),edu:clone(S.edu),det:clone(S.det)}; S.dirty=false;
-  var ck=hkey()+'|'+S.cls; if(S.classes[ck]){ S.classes[ck].acad=clone(S.acad); S.classes[ck].edu=clone(S.edu); S.classes[ck].det=clone(S.det); }
+  var ck=clsKey(S.cls,S.asSup); if(S.classes[ck]){ S.classes[ck].acad=clone(S.acad); S.classes[ck].edu=clone(S.edu); S.classes[ck].det=clone(S.det); }
   var names={}; ['acad','edu','det'].forEach(function(sh){ Object.keys(S[sh]).forEach(function(n){ names[n]=true; }); });
-  var h=S.homes[hkey()]; if(h && !h.classes.some(function(x){return x.cls===S.cls;})){
+  var h=S.homes[hkey()];
+  if(S.asSup){ if(h){ h.supClasses=h.supClasses||[]; if(!h.supClasses.some(function(x){return x.cls===S.cls;})) h.supClasses.push({cls:S.cls,n:Object.keys(S.edu).length}); }
+    document.getElementById('saveBtn').disabled=true; return; }
+  if(h && !h.classes.some(function(x){return x.cls===S.cls;})){
     h.classes.push({cls:S.cls, n:Object.keys(names).length, parts:[Object.keys(S.acad).length>0, Object.keys(S.edu).length>0, Object.keys(S.det).length>0]});
     var order=S.boot.classes; h.classes.sort(function(a,b){return order.indexOf(a.cls)-order.indexOf(b.cls);});
   }
@@ -881,10 +921,69 @@ function savedLocal(){
 // ---------------------------------------------------------------- supervisors: lesson visit
 function openVisit(id){
   function go(){
-    if(!id){ S.v={id:'',date:S.vinit.today,cls:'',subject:'',teacher:'',lesson:'',items:{},texts:{},students:{}}; S.vItem=0; S.view='visit'; setDirty(false); renderVisit(); return; }
+    S.vOpen={};
+    if(!id){ S.v={id:'',date:S.vinit.today,cls:'',subject:'',teacher:'',lesson:'',items:{},texts:{},inotes:{},students:{}}; S.vItem=0; S.view='visit'; setDirty(false); renderVisit(); return; }
     call('webLoadVisit',[S.teacher,S.pin,id],function(v){ S.v=v; S.vItem=0; S.view='visit'; setDirty(false); renderVisit(); });
   }
   if(S.vinit) go(); else call('webVisitInit',[S.teacher,S.pin],function(x){ S.vinit=x; go(); });
+}
+// ---------------------------------------------------------------- supervisors: meeting the parents
+function openFam(x){
+  function go(){
+    S.f={month:(x&&x.month)||S.finit.month||S.month, cls:(x&&x.cls)||'', student:(x&&x.student)||'', items:{}, contacts:'', meetings:'', agreed:'', notes:'', best:'', worst:'', loaded:false};
+    S.view='fam'; setDirty(false);
+    if(S.f.student) famLoad(); else renderFam();
+  }
+  if(S.finit) go(); else call('webFamInit',[S.teacher,S.pin],function(r){ S.finit=r; go(); });
+}
+function famLoad(){
+  var f=S.f;
+  call('webFamLoad',[S.teacher,S.pin,f.month,f.student],function(r){
+    if(S.f!==f) return;
+    f.items=r.items||{}; ['contacts','meetings','agreed','notes'].forEach(function(k){ f[k]=r[k]==null?'':r[k]; });
+    f.best=r.best||''; f.worst=r.worst||''; f.loaded=true; f.found=!!r.found; setDirty(false); renderFam();
+  });
+}
+function renderFam(){
+  who();
+  var I=S.finit, f=S.f, trait=f.cls && I.traitClasses.indexOf(f.cls)>=0;
+  document.getElementById('savebar').style.display='block'; document.getElementById('saveBtn').style.display='';
+  document.getElementById('saveBtn').textContent='حفظ المقابلة';
+  var st=f.cls?(I.students[f.cls]||[]):[];
+  var h='<div class="card"><h2>مقابلة الأهل<span class="grow"></span><button class="fill" id="back">رجوع</button></h2>'+
+    (f.found?'<div class="banner" style="margin-top:0">تظهر المقابلة كما حفظتها لهذا الشهر؛ عدّل ثم احفظ.</div>':'')+
+    '<div class="grid2"><div><label class="f">الشهر</label><select id="fM">'+opt(I.months,f.month,'— اختر —')+'</select></div>'+
+    '<div><label class="f">الصف</label><select id="fC">'+opt(I.classes,f.cls,'— اختر الصف —')+'</select></div>'+
+    '<div><label class="f">الطالب</label><select id="fS">'+opt(st,f.student,f.cls?'— اختر الطالب —':'اختر الصف أولًا')+'</select></div></div></div>';
+  if(f.student && f.loaded){
+    h+='<div class="card"><h2>تفاعل الأسرة (1–5)</h2>';
+    I.items.forEach(function(k,i){ var x=f.items[k];
+      h+='<div class="trow"><div class="lab">'+esc(k)+'</div><div class="sc">';
+      for(var n=1;n<=5;n++) h+='<button data-fi="'+i+'" data-v="'+n+'"'+(String(x)===String(n)?' class="on"':'')+'>'+n+'</button>';
+      h+='</div></div>'; });
+    h+='<div class="legend">1 ضعيف جدًا · 2 ضعيف · 3 مقبول · 4 جيد · 5 ممتاز — قيّم ما تعرفه فقط.</div>'+
+      '<div class="grid2"><div><label class="f">'+esc(I.extra.contacts)+'</label><input type="number" min="0" max="99" inputmode="numeric" id="fCt" value="'+esc(f.contacts)+'"></div>'+
+      '<div><label class="f">'+esc(I.extra.meetings)+'</label><input type="number" min="0" max="99" inputmode="numeric" id="fMt" value="'+esc(f.meetings)+'"></div></div>'+
+      '<label class="f">'+esc(I.extra.agreed)+'</label><textarea class="t" id="fAg" style="width:100%;min-height:52px;padding:8px 10px;border:1px solid var(--line);border-radius:9px">'+esc(f.agreed)+'</textarea>'+
+      '<label class="f">'+esc(I.extra.notes)+'</label><textarea class="t" id="fNo" style="width:100%;min-height:52px;padding:8px 10px;border:1px solid var(--line);border-radius:9px">'+esc(f.notes)+'</textarea></div>';
+    if(trait) h+='<div class="card"><h2>صفات الطفل (للتمهيدي)</h2><div class="hint" style="margin-top:0">لا توجد معلومات سابقة عن أطفال التمهيدي؛ ما تكتبه هنا يظهر في بطاقة الطالب، و«أسوأ صفة» تصير الصفة المستهدفة التي يتابعها المعلمون.</div>'+
+      '<label class="f">أحسن صفة</label><input type="text" id="fBe" value="'+esc(f.best)+'">'+
+      '<label class="f">أسوأ صفة (تحتاج علاجًا)</label><input type="text" id="fWo" value="'+esc(f.worst)+'"></div>';
+  } else if(f.student) h+='<div class="card empty">جارٍ التحميل…</div>';
+  app.innerHTML=h;
+  document.getElementById('back').onclick=function(){ leave(goHome); };
+  document.getElementById('fM').onchange=function(){ leave(function(){ f.month=document.getElementById('fM').value; f.loaded=false; if(f.student) famLoad(); else renderFam(); }); };
+  document.getElementById('fC').onchange=function(){ var c=this.value; leave(function(){ f.cls=c; f.student=''; f.loaded=false; renderFam(); }); };
+  document.getElementById('fS').onchange=function(){ var s=this.value; leave(function(){ f.student=s; f.loaded=false; if(s) famLoad(); else renderFam(); }); };
+  app.querySelectorAll('[data-fi]').forEach(function(b){ b.onclick=function(){ var k=I.items[+b.getAttribute('data-fi')], n=+b.getAttribute('data-v');
+    f.items[k]=String(f.items[k])===String(n)?'':n; setDirty(true); keep(renderFam); }; });
+  [['fCt','contacts'],['fMt','meetings'],['fAg','agreed'],['fNo','notes'],['fBe','best'],['fWo','worst']].forEach(function(x){
+    var e=document.getElementById(x[0]); if(e) e.oninput=function(){ f[x[1]]=e.value; setDirty(true); }; });
+}
+function saveFam(){
+  var f=S.f; if(!f||!f.student){ status('err','اختر الصف والطالب.'); return; }
+  var p={sup:S.teacher,pin:S.pin,month:f.month,cls:f.cls,student:f.student,items:f.items,contacts:f.contacts,meetings:f.meetings,agreed:f.agreed,notes:f.notes,best:f.best,worst:f.worst};
+  call('webFamSave',[p],function(){ setDirty(false); f.found=true; status('ok','تم حفظ المقابلة ✓'); delete S.homes[hkey()]; S.classes={}; });
 }
 function opt(list,cur,ph){ var h='<option value="">'+esc(ph)+'</option>'; list.forEach(function(x){h+='<option'+(x===cur?' selected':'')+'>'+esc(x)+'</option>';}); return h; }
 function renderVisit(){
@@ -903,10 +1002,13 @@ function renderVisit(){
   // teacher evaluation
   var tq=I.tq && v.subject===I.tq.subject, tItems=vItems();
   h+='<div class="card"><h2>'+(tq?'تقييم حصة التلقين (1–5)':'تقييم أداء المعلم/ة في الحصة (1–5)')+'</h2>';
+  v.inotes=v.inotes||{}; S.vOpen=S.vOpen||{};
   tItems.forEach(function(k,i){
-    var x=v.items[k]; h+='<div class="trow"><div class="lab">'+esc(k)+'</div><div class="sc">';
+    var x=v.items[k], nt=v.inotes[k]||''; h+='<div class="trow"><div class="lab">'+esc(k)+(I.inotes?'<button class="nb'+(nt?' has':'')+'" data-tn="'+i+'" title="ملاحظة اختيارية على هذا البند">✎'+(nt?' ملاحظة':'')+'</button>':'')+'</div><div class="sc">';
     for(var n=1;n<=5;n++) h+='<button data-ti="'+i+'" data-v="'+n+'"'+(String(x)===String(n)?' class="on"':'')+'>'+n+'</button>';
-    h+='</div></div>';
+    h+='</div>';
+    if(nt||S.vOpen[k]) h+='<div class="noteRow"><textarea data-tnt="'+i+'" placeholder="ملاحظة اختيارية على هذا البند">'+esc(nt)+'</textarea></div>';
+    h+='</div>';
   });
   I.texts.forEach(function(k,i){ h+='<label class="f">'+esc(k)+'</label><textarea class="t" style="width:100%;min-height:52px;padding:8px 10px;border:1px solid var(--line);border-radius:9px" data-tx="'+i+'">'+esc(v.texts[k]||'')+'</textarea>'; });
   h+='<div class="legend">1 ضعيف جدًا · 2 ضعيف · 3 مقبول · 4 جيد · 5 ممتاز</div></div>';
@@ -951,6 +1053,9 @@ function bindVisit(){
   app.querySelectorAll('[data-ti]').forEach(function(b){ b.onclick=function(){ var k=vItems()[+b.getAttribute('data-ti')], n=+b.getAttribute('data-v');
     v.items[k] = String(v.items[k])===String(n) ? '' : n; setDirty(true); keep(renderVisit); }; });
   app.querySelectorAll('[data-tx]').forEach(function(t){ t.oninput=function(){ v.texts[I.texts[+t.getAttribute('data-tx')]]=t.value; setDirty(true); }; });
+  app.querySelectorAll('[data-tn]').forEach(function(b){ b.onclick=function(){ var k=vItems()[+b.getAttribute('data-tn')]; S.vOpen[k]=!S.vOpen[k]; keep(renderVisit);
+    var t=app.querySelector('[data-tnt="'+b.getAttribute('data-tn')+'"]'); if(t) t.focus(); }; });
+  app.querySelectorAll('[data-tnt]').forEach(function(t){ t.oninput=function(){ v.inotes[vItems()[+t.getAttribute('data-tnt')]]=t.value; setDirty(true); }; });
   app.querySelectorAll('[data-vi]').forEach(function(b){ b.onclick=function(){ S.vItem=+b.getAttribute('data-vi'); keep(renderVisit); }; });
   var st=v.cls?(I.students[v.cls]||[]):[], keyOf=function(){ return S.vItem<I.stu.length ? I.stu[S.vItem].key : I.stuNote; };
   app.querySelectorAll('[data-vr]').forEach(function(b){ b.onclick=function(){ var name=st[+b.getAttribute('data-vr')], n=+b.getAttribute('data-v'), k=keyOf();
@@ -966,7 +1071,7 @@ function saveVisit(){
   var v=S.v;
   if(!v.date){ status('err','اكتب تاريخ الحصة.'); return; }
   if(!v.cls||!v.subject||!v.teacher){ status('err','اختر الصف والمادة والمعلم/ة.'); return; }
-  var p={sup:S.teacher,pin:S.pin,id:v.id,date:v.date,cls:v.cls,subject:v.subject,teacher:v.teacher,lesson:v.lesson,items:v.items,texts:v.texts,students:v.students};
+  var p={sup:S.teacher,pin:S.pin,id:v.id,date:v.date,cls:v.cls,subject:v.subject,teacher:v.teacher,lesson:v.lesson,items:v.items,texts:v.texts,inotes:v.inotes||{},students:v.students};
   call('webSaveVisit',[p],function(r){
     v.id=r.id; S.dirty=false; document.getElementById('saveBtn').disabled=true; delete S.homes[hkey()];
     status('ok','حُفظت الزيارة ✓ ('+r.students+' طالبًا'+(r.index!==''?'، مؤشر المعلم '+r.index:'')+')'+(r.counted?'':' — التاريخ خارج أشهر المتابعة فلم يدخل في مؤشرات الطلاب'));
@@ -974,7 +1079,7 @@ function saveVisit(){
   });
 }
 
-document.getElementById('saveBtn').onclick=function(){ if(busy>0) return; if(S.view==='visit') saveVisit(); else if(S.view==='tasks') saveTasks(); else if(S.view==='tg') saveTg(); else saveClass(); };
+document.getElementById('saveBtn').onclick=function(){ if(busy>0) return; if(S.view==='visit') saveVisit(); else if(S.view==='tasks') saveTasks(); else if(S.view==='tg') saveTg(); else if(S.view==='fam') saveFam(); else saveClass(); };
 start();
 </script>
 <script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js');});}</script>
