@@ -89,6 +89,7 @@ select,input[type=password],input[type=text],input[type=date],.grid2 input[type=
 .obstrip.ok{background:#eaf6ec;border-color:#9fd1a8;color:#1d5b2a}
 .obstrip.bad{background:#fdecec;border-color:#eba4a4;color:#8a1f1f}
 textarea.need{border-color:#d9534f;box-shadow:0 0 0 3px rgba(217,83,79,.15)}
+input.grade.need{border-color:#d9534f;box-shadow:0 0 0 3px rgba(217,83,79,.15)}
 .noteRow{flex-basis:100%;display:flex}
 .noteRow textarea,.row textarea.t{flex:1;min-height:40px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;resize:vertical;background:#fff}
 .row textarea.t{flex:1.4}
@@ -652,7 +653,7 @@ function gradesView(){
   if(it.grade){
     var done=d.students.filter(function(st){return val('acad',st.name,S.subject)!=='';}).length;
     h+='<div class="bar"><span>علامات <b>'+esc(S.subject)+'</b> من 100</span><span class="grow"></span><span>'+done+' من '+d.students.length+'</span></div>'+
-      '<div class="hint" style="margin:0 0 8px">اكتب العلامة <b>من 100</b> دائمًا: إذا صحّحت من 10 أو 20 فحوّلها (8 من 10 = 80، 15 من 20 = 75).</div><div class="list">';
+      '<div class="hint" style="margin:0 0 8px">اكتب العلامة <b>من 100</b> دائمًا: إذا صحّحت من 10 أو 20 فحوّلها (8 من 10 = 80، 15 من 20 = 75). العلامة وملاحظتها إجباريتان لكل الطلاب.</div><div class="list">';
     d.students.forEach(function(st,i){
       var v=val('acad',st.name,S.subject);
       if(v!=='') S.open[st.name+'|'+dk(S.subject,it.item)]=true;   // a grade always shows its note box
@@ -863,6 +864,26 @@ function withPending(d,cls,sup){
   return d;
 }
 /** A grade out of 100 that was entered or changed needs a note (why this grade). Returns the first student missing one. */
+/** From 11/2026 a grade out of 100 is required for every student in each subject the teacher rated this month
+ *  (any skill, note or grade in it); a subject marked «بلا علامة» has no grade. */
+var GRADE_REQ_FROM='11/2026';
+function missingGrades(){
+  var d=S.data, ms=(S.boot&&S.boot.months)||[];
+  if(S.asSup || ms.indexOf(S.month)<0 || ms.indexOf(S.month)<ms.indexOf(GRADE_REQ_FROM)) return null;
+  var out=null;
+  d.subjects.some(function(sub){
+    if(skillList(sub).indexOf('بلا علامة')>=0) return false;
+    var touched=d.students.some(function(st){
+      if(val('acad',st.name,sub)!=='') return true;
+      var o=S.det[st.name]||{}; return Object.keys(o).some(function(k){ return k.indexOf(sub+'||')===0 && ((o[k].lvl!==''&&o[k].lvl!=null)||String(o[k].note||'').trim()!==''); });
+    });
+    if(!touched) return false;
+    var miss=d.students.filter(function(st){ return val('acad',st.name,sub)===''; });
+    if(miss.length){ out={sub:sub, st:miss[0], n:miss.length}; return true; }
+    return false;
+  });
+  return out;
+}
 function missingGradeNote(){
   var d=S.data, miss=null;
   d.subjects.some(function(sub){ return d.students.some(function(st){
@@ -881,6 +902,13 @@ function lowGrades(){
   return hit;
 }
 function saveClass(){
+  var mz=missingGrades();
+  if(mz){
+    S.tab='grades'; S.subject=mz.sub; S.si=0; render();
+    var iz=S.data.students.indexOf(mz.st), tz=app.querySelector('[data-g="'+iz+'"]'); if(tz){ tz.classList.add('need'); tz.scrollIntoView({block:'center'}); tz.focus(); }
+    status('err','العلامة من 100 إجبارية لكل الطلاب في «'+mz.sub+'»: ناقص '+mz.n+(mz.n===1?' طالب':' طلاب')+' (أولهم '+mz.st.name+'). اكتبها مع ملاحظتها ثم احفظ.');
+    return;
+  }
   var mg=missingGradeNote();
   if(mg){
     S.tab='grades'; S.subject=mg.sub; S.si=0; var k=mg.st.name+'|'+dk(mg.sub,S.data.gradeItem); S.open[k]=true; render();
