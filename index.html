@@ -531,7 +531,7 @@ function saveTg(){
   call('webTgSave',[S.teacher,S.pin,d.date,out],function(r){ d.values=clone(d.cur); S.dirty=false; document.getElementById('saveBtn').disabled=true; status('ok','تم الحفظ ✓ ('+r.saved+')'); });
 }
 
-// ---------------------------------------------------------------- parents' meetings (whoever is named in the settings: أ. مفاز، أ. جعفر)
+// ---------------------------------------------------------------- parents' meetings (whoever is named in the settings, AS14)
 function openMeets(){ call('webMeetInit',[S.teacher,S.pin],function(I){ S.mi=I; setDirty(false); renderMeets(); }); }
 function meetCount(x){ var p=[];
   if(x.momIn!==''&&x.momIn!=null) p.push('الأمهات: حضرت '+x.momIn+'، غابت '+x.momOut);
