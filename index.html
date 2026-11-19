@@ -146,8 +146,8 @@ input[type=text]#lfTitle{margin-top:0}
 .row.ltext{border-top:0;padding-top:0}
 .row.ltext .nm small{white-space:normal;line-height:1.7;font-size:12.5px}
 .row.lrow .nm b{white-space:normal}
-.c0{--cv:#1f5e3b;--cd:#17472c}.c1{--cv:#1f4f7c;--cd:#173c5e}.c2{--cv:#8a3848;--cd:#6a2a37}.c3{--cv:#1b6a72;--cd:#135158}
-.c4{--cv:#9c6a14;--cd:#7a520e}.c5{--cv:#5a3f88;--cd:#453069}.c6{--cv:#5c7024;--cd:#46561a}.c7{--cv:#a04a2c;--cd:#7c3820}
+.c0{--cv:#2c9a67;--cd:#237b52}.c1{--cv:#3a7fc2;--cd:#2c669e}.c2{--cv:#df6a5c;--cd:#bb5246}.c3{--cv:#23a0a0;--cd:#198080}
+.c4{--cv:#e3a326;--cd:#bb851a}.c5{--cv:#8c66cc;--cd:#704fa8}.c6{--cv:#7aa637;--cd:#618629}.c7{--cv:#d95c93;--cd:#b44777}
 .welc{text-align:center;padding:34px 10px 14px}
 .welc .wleaf{width:104px;height:104px;margin:0 auto 16px}
 .welc .wleaf svg{width:100%;height:100%;overflow:visible}
@@ -185,39 +185,52 @@ input[type=text]#lfTitle{margin-top:0}
 .phero b{display:block;font-family:'Aref Ruqaa',serif;font-size:34px;line-height:1.3;color:var(--brand)}
 .phero b i{font-style:normal;font-family:inherit;font-size:22px;color:var(--gold)}
 .phero span{display:block;margin-top:2px;color:var(--muted);font-size:14px}
+.phero .pnew{display:inline-block;margin-top:8px;background:#fde8e8;color:#b3261e;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:600}
 .pact{display:flex;gap:8px;margin-top:12px}
 .pact button{border:1px solid var(--line);background:#fff;color:var(--brand2);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer}
-.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px 12px;margin-top:20px}
-.stile{position:relative;display:block;min-height:148px;padding:0;border:0;cursor:pointer;background:var(--cv);border-radius:14px 5px 5px 14px;box-shadow:0 1px 0 var(--cd),0 8px 16px -8px rgba(23,48,31,.45);overflow:hidden;text-align:center}
-.stile:before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:13px;background:var(--cd)}
-.stile:after{content:"";position:absolute;inset-block:0;inset-inline-start:13px;width:2px;background:rgba(255,255,255,.14)}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px 12px;margin-top:20px}
+.stile{position:relative;display:block;min-height:180px;padding:0;border:0;cursor:pointer;background-color:var(--cv);border-radius:20px 8px 8px 20px;box-shadow:0 2px 0 var(--cd),0 10px 18px -10px rgba(23,48,31,.5);text-align:center}
+.stile:before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:14px;background-color:var(--cd);border-radius:0 8px 8px 0}
+.stile.lit{background-image:linear-gradient(135deg,rgba(255,255,255,.3),rgba(255,255,255,0) 46%);box-shadow:0 2px 0 var(--cd),0 14px 22px -10px var(--cv)}
+.stile.dim{background-image:linear-gradient(rgba(245,247,244,.66),rgba(245,247,244,.66));box-shadow:none}
+.stile.dim:before{background-image:linear-gradient(rgba(245,247,244,.6),rgba(245,247,244,.6))}
+.stile.dim .lab{opacity:.72}
+.stile.dim .dood{opacity:.5}
 .stile:active{transform:translateY(1px)}
-.stile .lab{display:block;margin:36px 14px 0 27px;background:#fffdf6;border-radius:5px;padding:9px 6px 8px;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.stile .lab{position:relative;display:block;margin:28px 14px 0 28px;background:#fffdf6;border-radius:10px;padding:9px 6px 8px;box-shadow:0 2px 3px rgba(0,0,0,.22);transform:rotate(-1.6deg)}
+.stile:nth-child(even) .lab{transform:rotate(1.3deg)}
 .stile .lab b{display:block;font-family:'Aref Ruqaa',serif;font-size:21px;line-height:1.35;color:var(--ink)}
-.stile em{display:block;font-style:normal;font-size:11.5px;color:var(--muted);margin-top:3px;padding-top:4px;border-top:1px solid #e3ddc9}
-.stile em.on{color:var(--cv);font-weight:700}
-.stile .rib{position:absolute;top:0;inset-inline-end:16px;width:20px;height:38px;background:#d9a520;clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%)}
-.stile.empty{opacity:.42;box-shadow:none}
+.stile em{display:block;font-style:normal;font-size:11.5px;color:var(--muted);margin-top:3px;padding-top:4px;border-top:1px dashed #e0d9c2}
+.stile em.on{color:var(--cd);font-weight:700}
+.stile em.sc{color:var(--cd)}
+.stile .rib{position:absolute;top:0;inset-inline-end:18px;width:20px;height:36px;background:#f2c230;clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%)}
+.stile .bdg{position:absolute;top:-8px;inset-inline-start:-6px;z-index:2;min-width:28px;height:28px;padding:0 7px;border-radius:14px;background:#e5383b;color:#fff;font-weight:700;font-size:14px;line-height:24px;border:2px solid #fff;box-shadow:0 2px 6px rgba(229,56,59,.45)}
+.dood{position:absolute;bottom:8px;inset-inline-end:12px;width:46px;height:46px;color:rgba(255,255,255,.55);transform:rotate(-8deg)}
+.dood svg{width:100%;height:100%}
+.dood.gly{width:auto;height:auto;font-family:'Aref Ruqaa',serif;font-size:27px;line-height:1;font-weight:700;bottom:12px;direction:rtl}
 .pback{border:0;background:transparent;color:var(--brand2);font-weight:600;padding:16px 4px 8px;cursor:pointer;font-size:14px}
-.nbk{border-radius:14px 5px 5px 14px;overflow:hidden;box-shadow:0 10px 24px -12px rgba(23,48,31,.5);background:#fffefa}
-.shero{position:relative;background:var(--cv);color:#fff;padding:18px 30px 16px 16px}
-.shero:before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:13px;background:var(--cd)}
+.nbk{border-radius:20px 8px 8px 20px;overflow:hidden;box-shadow:0 12px 26px -14px rgba(23,48,31,.55);background:#fffefa}
+.shero{position:relative;background-color:var(--cv);background-image:linear-gradient(135deg,rgba(255,255,255,.26),rgba(255,255,255,0) 50%);color:#fff;padding:18px 32px 16px 16px}
+.shero:before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:14px;background:var(--cd)}
 .shero b{display:block;font-family:'Aref Ruqaa',serif;font-size:36px;line-height:1.25}
-.shero small{display:block;font-size:13px;opacity:.85;margin-top:2px}
-.npage{--ln:32px;padding:var(--ln) 0 var(--ln);background-color:#fffefa;
-  background-image:linear-gradient(to left,transparent 75px,#e2978b 75px,#e2978b 76px,transparent 76px),repeating-linear-gradient(transparent 0,transparent calc(var(--ln) - 1px),#dfe8ea calc(var(--ln) - 1px),#dfe8ea var(--ln))}
-.lcard{display:grid;grid-template-columns:76px 1fr;margin-bottom:var(--ln)}
+.shero small{display:block;font-size:13px;opacity:.9;margin-top:2px}
+.shero .dood{width:62px;height:62px;bottom:12px;inset-inline-end:18px;color:rgba(255,255,255,.5)}
+.shero .dood.gly{width:auto;height:auto;font-size:38px;bottom:18px}
+.npage{--ln:32px;--mgw:96px;padding:var(--ln) 0 var(--ln);background-color:#fffefa;background-repeat:no-repeat,repeat;background-position:0 0,0 -6px;
+  background-image:linear-gradient(to left,transparent calc(var(--mgw) - 1px),#e9a79c calc(var(--mgw) - 1px),#e9a79c var(--mgw),transparent var(--mgw)),repeating-linear-gradient(transparent 0,transparent calc(var(--ln) - 1px),#e4ecee calc(var(--ln) - 1px),#e4ecee var(--ln))}
+.lcard{display:grid;grid-template-columns:var(--mgw) 1fr;margin-bottom:var(--ln)}
 .lcard:last-child{margin-bottom:0}
-.lcard .mg{text-align:center;padding:0 4px;color:var(--muted);font-size:12px;line-height:16px}
-.lcard .mg b{display:block;font-weight:600;color:var(--ink)}
-.lcard .mg span,.lcard .mg small{display:block;font-size:11.5px}
-.lcard .mg i{display:inline-block;font-style:normal;font-weight:700;font-size:12px;line-height:22px;margin:5px 0;padding:0 9px;border-radius:999px;background:#d9a520;color:#3a2a00}
-.lcard .mg i + small{margin-top:0}
+.lcard .mg{text-align:center;padding:0 3px;color:var(--muted);font-size:12px;line-height:var(--ln);white-space:nowrap}
+.lcard .mg b{display:block;font-weight:600;color:var(--ink);font-size:12.5px}
+.lcard .mg small{display:block;font-size:12px}
+.lcard .mg i{display:inline-block;vertical-align:middle;font-style:normal;font-weight:700;font-size:12.5px;line-height:22px;padding:0 10px;border-radius:999px;background:#f2c230;color:#3a2a00}
+.lcard .mg u{display:block;text-decoration:none;color:#e5383b;font-weight:700;font-size:12px}
+.lcard .mg u:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#e5383b;margin-inline-end:4px}
 .lcard .en{padding:0 12px 0 14px;min-width:0}
 .lcard h3{margin:0;font-family:'Aref Ruqaa',serif;font-size:23px;line-height:var(--ln);color:var(--brand)}
 .lcard p{margin:0;font-size:15.5px;line-height:var(--ln);overflow-wrap:anywhere}
 .lcard.none p{color:var(--muted)}
-.lcard .hw{margin:0 0 0 6px;padding:0 12px;background:#fff3b0;line-height:var(--ln);font-size:15px;overflow-wrap:anywhere;box-shadow:0 3px 6px -3px rgba(60,45,0,.45);transform:rotate(-.6deg)}
+.lcard .hw{margin:var(--ln) 0 0 4px;padding:0 12px;background:#fff1a8;line-height:var(--ln);font-size:15px;overflow-wrap:anywhere;box-shadow:0 4px 7px -4px rgba(60,45,0,.5);transform:rotate(-.7deg)}
 .lcard .hw b{display:block;color:#7a5600;font-size:13px}
 .mrow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .mrow select{width:auto;flex:1;max-width:220px;padding:8px 10px}
@@ -248,7 +261,7 @@ input[type=text]#lfTitle{margin-top:0}
 var S = {boot:null, teacher:'', pin:'', month:'', sup:false, view:'login', home:null,
          cls:'', data:null, tab:'grades', subject:'', si:0, quick:0, group:0, item:0,
          acad:{}, edu:{}, det:{}, orig:{acad:{}, edu:{}, det:{}}, open:{}, dirty:false,
-         vinit:null, v:null, vItem:0, homes:{}, classes:{}, att:null, tk:null, tg:null, asSup:false, finit:null, f:null, li:null, lf:null, ls:null, lDay:'', parent:'', pl:null, plErr:'', pSub:'', pY:0};
+         vinit:null, v:null, vItem:0, homes:{}, classes:{}, att:null, tk:null, tg:null, asSup:false, finit:null, f:null, li:null, lf:null, ls:null, lDay:'', parent:'', pl:null, plErr:'', pSub:'', pY:0, pNew:null};
 var app = document.getElementById('app');
 var NOTES = [{key:'أبرز ما تحسّن', label:'أبرز ما تحسّن'}, {key:'ما يحتاج متابعة', label:'ما يحتاج متابعة'}];
 var LEAVE = 'لديك تغييرات غير محفوظة. هل تريد المتابعة دون حفظ؟';
@@ -1576,16 +1589,45 @@ function parentFetch(loud){
       if(/رابط الصف غير صحيح/.test(m||'')){ store('albaraem_parent',null); store('albaraem_pl_'+id,null); S.pl=null; S.plErr=m; S.view='parent'; renderParent(); return; }
       S.plErr=/طلب غير معروف/.test(m||'')?'هذه الخدمة لم تُفعَّل بعد. حاول لاحقًا.':(m||'تعذّر الاتصال.'); again(); }, !loud);
 }
+function plKey(s,x){ return x.date+'|'+x.p+'|'+s; }
+/** Lessons this phone has opened, per class (like read messages). First visit: only today's count as new. */
+function plSeen(){
+  var d=S.pl.d, k='albaraem_seen_'+d.id, o=jget(k);
+  if(!o || !o.keys){ o={keys:{}}; d.days.forEach(function(day){ if(day.date===d.today) return; day.lessons.forEach(function(x){ o.keys[day.date+'|'+x.p+'|'+x.subject]=1; }); }); jput(k,o); }
+  return o.keys;
+}
+function plMarkSeen(s){
+  var d=S.pl.d, k='albaraem_seen_'+d.id, old=plSeen(), keep={};
+  d.days.forEach(function(day){ day.lessons.forEach(function(x){ var q=day.date+'|'+x.p+'|'+x.subject; if(old[q] || x.subject===s.name) keep[q]=1; }); });   // lessons that left the page are forgotten
+  jput(k,{keys:keep});
+}
 /** Lessons of the class grouped by subject (newest first); the subject list is the class's, then anything else that was posted. */
 function plSubjects(){
-  var d=S.pl.d, map={}, order=(d.subjects||[]).slice();
-  d.days.forEach(function(day){ day.lessons.forEach(function(x){ (map[x.subject]=map[x.subject]||[]).push({date:day.date,p:x.p,title:x.title,text:x.text,hw:x.hw}); if(order.indexOf(x.subject)<0) order.push(x.subject); }); });
-  return order.map(function(s,i){ var l=map[s]||[]; return {name:s, i:i, list:l, today:l.filter(function(x){return x.date===d.today;}).length, hw:l.some(function(x){return x.date===d.today && x.hw;})}; });
+  var d=S.pl.d, map={}, order=(d.subjects||[]).slice(), seen=plSeen(), sched=d.todaySubjects||null;
+  d.days.forEach(function(day){ day.lessons.forEach(function(x){ (map[x.subject]=map[x.subject]||[]).push({date:day.date,p:x.p,title:x.title,text:x.text,hw:x.hw,isNew:!seen[day.date+'|'+x.p+'|'+x.subject]}); if(order.indexOf(x.subject)<0) order.push(x.subject); }); });
+  return order.map(function(s,i){ var l=map[s]||[], td=l.filter(function(x){return x.date===d.today;}).length;
+    return {name:s, i:i, list:l, today:td, hw:l.some(function(x){return x.date===d.today && x.hw;}), fresh:l.filter(function(x){return x.isNew;}).length,
+      sched: !!td || (sched? sched.indexOf(s)>=0 : false), dim: !!(sched && sched.length) && !td && sched.indexOf(s)<0}; });
 }
-function plMono(s){ var w=String(s).split(' '); var k=(w.length>1 && /^(لغة|مهارات|تطبيقات|فقه|سيرة)$/.test(w[0]))? w[1] : w[0]; return k.replace(/^ال/,'').charAt(0); }
+var PL_ICO={
+  book:'M12 6c-2-1.5-5-2-8-1.5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-13c-3-.5-6 0-8 1.5zM12 6v13',
+  flask:'M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3M7.5 15h9',
+  pen:'M4 20l1-4L16 5l3 3L8 19l-4 1zM14 7l3 3',
+  star:'M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L3.3 9.3l6.1-.7z',
+  moon:'M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z',
+  heart:'M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z',
+  ball:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3.5 9.5c5 1 12 1 17 0M12 3c-3 5-3 13 0 18M12 3c3 5 3 13 0 18',
+  art:'M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2s-.5-1.5-.5-2.5S14.5 15 16 15h2a3 3 0 0 0 3-3c0-5-4-9-9-9zM7.5 12h.01M9.5 8h.01M14.5 7.5h.01',
+  sprout:'M12 21v-9M12 14c-4 0-6-2-6.5-5.5C9 8.5 11.5 10 12 14zM12 11c0-4 2-6 6-6.5C18 8 16 10.5 12 11z'};
+function plIcon(s){
+  var g=/عربية/.test(s)?'أ ب':/حساب/.test(s)?'١٢٣':/إنجليزية/.test(s)?'Abc':'';
+  if(g) return '<span class="dood gly" aria-hidden="true">'+g+'</span>';
+  var k=/علوم/.test(s)?'flask':/خط/.test(s)?'pen':/عقيدة/.test(s)?'star':/حديث|فقه|سيرة|صحابيات/.test(s)?'moon':/وجدانية|آداب/.test(s)?'heart':/حياتية/.test(s)?'sprout':/رياضة/.test(s)?'ball':/فن/.test(s)?'art':'book';
+  return '<span class="dood" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="'+PL_ICO[k]+'"/></svg></span>';
+}
 function plLesson(x,today){
   var m=String(x.date).split('-');
-  return '<div class="lcard'+(today?' now':'')+'"><div class="mg">'+(today?'<i>اليوم</i>':'<b>'+esc(lDayName(x.date))+'</b><span>'+(+m[2])+'/'+(+m[1])+'</span>')+'<small>حصة '+esc(x.p)+'</small></div>'+
+  return '<div class="lcard'+(today?' now':'')+'"><div class="mg">'+(today?'<i>اليوم</i>':'<b>'+esc(lDayName(x.date))+' '+(+m[2])+'/'+(+m[1])+'</b>')+'<small>الحصة '+esc(x.p)+'</small>'+(x.isNew?'<u>جديد</u>':'')+'</div>'+
     '<div class="en"><h3>'+esc(x.title)+'</h3><p>'+lNl(x.text)+'</p>'+(x.hw?'<div class="hw"><b>الواجب</b>'+lNl(x.hw)+'</div>':'')+'</div></div>';
 }
 function renderParent(){
@@ -1594,17 +1636,19 @@ function renderParent(){
     (S.plErr?'<button class="btn block" id="pRetry">إعادة المحاولة</button><button class="btn ghost block" id="pPick">اختيار الصف</button>':'')+'</div>';
     var r=document.getElementById('pRetry'); if(r) r.onclick=function(){ S.plErr=''; renderParent(); parentFetch(true); };
     var k=document.getElementById('pPick'); if(k) k.onclick=renderParentPick; return; }
-  var d=c.d, subs=plSubjects(), nToday=0; subs.forEach(function(s){ nToday+=s.today; });
+  var d=c.d, subs=plSubjects(), nToday=0, nNew=0; subs.forEach(function(s){ nToday+=s.today; nNew+=s.fresh; });
   var a=String(d.label).split(' — ');
   h+='<div class="phero"><b>'+esc(a[0])+(a[1]?' <i>'+esc(a[1])+'</i>':'')+'</b>'+
      '<span>'+esc(lLabel(d.today))+'، '+(nToday? 'نُزّل اليوم '+nToday+(nToday===1?' درس':nToday===2?' درسان':nToday<=10?' دروس':' درسًا') : (d.school?'لم تُنزَّل دروس اليوم بعد':'لا دوام اليوم'))+'</span>'+
+     (nNew?'<span class="pnew">'+(nNew===1?'درس واحد جديد لم تفتحه':nNew===2?'درسان جديدان لم تفتحهما':nNew+(nNew<=10?' دروس جديدة':' درسًا جديدًا')+' لم تفتحها')+'</span>':'')+
      '<div class="pact"><button id="pRef">تحديث</button><button id="pSwitch">تغيير الصف</button></div></div>';
   if(S.plErr) h+='<div class="banner">تعذّر التحديث الآن؛ هذه آخر نسخة محفوظة على الهاتف.</div>';
   h+='<div class="sgrid">';
-  subs.slice().sort(function(x,y){ return (y.today?1:0)-(x.today?1:0) || (y.list.length?1:0)-(x.list.length?1:0) || x.i-y.i; }).forEach(function(s){
-    var st = s.today ? '<em class="on">درس اليوم'+(s.hw?' · واجب':'')+'</em>' : s.list.length ? '<em>آخر درس: '+esc(lLabel(s.list[0].date))+'</em>' : '<em class="no">لا دروس بعد</em>';
-    h+='<button class="stile c'+(s.i%8)+(s.list.length?'':' empty')+'" data-ps="'+esc(s.name)+'">'+(s.today?'<i class="rib" aria-hidden="true"></i>':'')+'<span class="lab"><b>'+esc(s.name)+'</b>'+st+'</span></button>'; });
-  h+='</div><div class="hint" style="text-align:center;margin-top:16px">لكل مادة دفتر: افتحه لترى درس اليوم وما قبله.</div>'+installCard();
+  subs.slice().sort(function(x,y){ return (y.today?1:0)-(x.today?1:0) || (y.fresh?1:0)-(x.fresh?1:0) || (y.sched?1:0)-(x.sched?1:0) || (y.list.length?1:0)-(x.list.length?1:0) || x.i-y.i; }).forEach(function(s){
+    var st = s.today ? '<em class="on">درس اليوم'+(s.hw?' · واجب':'')+'</em>' : s.sched ? '<em class="sc">حصة اليوم</em>' : s.list.length ? '<em>آخر درس: '+esc(lLabel(s.list[0].date))+'</em>' : '<em class="no">لا دروس بعد</em>';
+    h+='<button class="stile c'+(s.i%8)+(s.dim?' dim':'')+(s.sched?' lit':'')+'" data-ps="'+esc(s.name)+'">'+(s.today?'<i class="rib" aria-hidden="true"></i>':'')+
+      (s.fresh?'<span class="bdg" aria-label="'+s.fresh+' جديد">'+s.fresh+'</span>':'')+plIcon(s.name)+'<span class="lab"><b>'+esc(s.name)+'</b>'+st+'</span></button>'; });
+  h+='</div><div class="hint" style="text-align:center;margin-top:16px">الدفاتر الزاهية موادّ اليوم في جدول الصف، والرقم عدد الدروس الجديدة التي لم تفتحها.</div>'+installCard();
   app.innerHTML=h; window.scrollTo(0,S.pY||0); S.pY=0;
   document.getElementById('pRef').onclick=function(){ parentFetch(true); };
   document.getElementById('pSwitch').onclick=function(){ renderParentPick(); };
@@ -1616,16 +1660,19 @@ function renderParentSubject(keepScroll){
   var y=window.scrollY; S.view='psub';
   var d=S.pl.d, s=plSubjects().filter(function(x){ return x.name===S.pSub; })[0];
   if(!s){ renderParent(); return; }
+  if(keepScroll && S.pNew) s.list.forEach(function(x){ if(S.pNew[plKey(s.name,x)]) x.isNew=true; });   // a refresh while reading keeps the «جديد» marks
+  else { S.pNew={}; s.list.forEach(function(x){ if(x.isNew) S.pNew[plKey(s.name,x)]=1; }); }
   var a=String(d.label).split(' — '), h='<button class="pback" id="pBack">› دفاتر المواد</button>'+
-    '<div class="nbk c'+(s.i%8)+'"><div class="shero"><b>'+esc(s.name)+'</b><small>'+esc(a.join('، '))+'</small></div><div class="npage">';
+    '<div class="nbk c'+(s.i%8)+'"><div class="shero">'+plIcon(s.name)+'<b>'+esc(s.name)+'</b><small>'+esc(a.join('، '))+'</small></div><div class="npage">';
   var t=s.list.filter(function(x){ return x.date===d.today; }), old=s.list.filter(function(x){ return x.date!==d.today; });
   if(t.length) h+=t.sort(function(x,y){return x.p-y.p;}).map(function(x){ return plLesson(x,true); }).join('');
-  else h+='<div class="lcard none"><div class="mg"><i>اليوم</i></div><div class="en"><p>لا درس في هذه المادة اليوم.</p></div></div>';
+  else h+='<div class="lcard none"><div class="mg"><i>اليوم</i></div><div class="en"><p>'+(s.sched?'حصة اليوم لم يُنزَّل درسها بعد.':'لا حصة لهذه المادة اليوم.')+'</p></div></div>';
   h+=old.map(function(x){ return plLesson(x,false); }).join('');
   if(!old.length) h+='<div class="lcard none"><div class="mg"></div><div class="en"><p>لا دروس سابقة في آخر '+(d.keep||7)+' يومًا.</p></div></div>';
   h+='</div></div>';
   app.innerHTML=h; window.scrollTo(0,keepScroll?y:0);
   document.getElementById('pBack').onclick=function(){ renderParent(); };
+  plMarkSeen(s);
 }
 document.addEventListener('visibilitychange',function(){
   if(document.visibilityState!=='visible') return;
