@@ -146,14 +146,57 @@ input[type=text]#lfTitle{margin-top:0}
 .row.ltext{border-top:0;padding-top:0}
 .row.ltext .nm small{white-space:normal;line-height:1.7;font-size:12.5px}
 .row.lrow .nm b{white-space:normal}
-.pday{margin:18px 4px 8px;font-weight:700;color:var(--brand);font-size:14.5px}
+.pday{margin:20px 4px 10px;font-weight:700;color:var(--brand);font-size:15px}
 .pday.today{font-size:16px}
-.pday.sep{margin-top:26px;padding-top:14px;border-top:1px dashed var(--line);color:var(--muted);font-weight:600}
-.lcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:10px}
-.lcard .ph{font-size:13px;color:var(--muted);font-weight:600}
-.lcard h3{margin:8px 0 4px;font-size:16px;line-height:1.5}
-.lcard p{margin:0;line-height:1.8;font-size:14.5px;overflow-wrap:anywhere}
-.lcard .hw{margin-top:10px;background:#fffaf0;border:1px solid #ecd9a8;border-radius:10px;padding:8px 12px;font-size:14px;line-height:1.8;overflow-wrap:anywhere}
+.pday.sep{margin-top:28px;padding-top:16px;border-top:1px dashed var(--line);color:var(--muted);font-weight:600}
+.c0{--tb:#e6f0ea;--tf:#1f5e3b}.c1{--tb:#fdf3dc;--tf:#94650f}.c2{--tb:#e4eef9;--tf:#24558f}.c3{--tb:#f6e7f1;--tf:#8a2f6b}
+.c4{--tb:#e1f2f3;--tf:#1c6b72}.c5{--tb:#fbe9e3;--tf:#a2452a}.c6{--tb:#ece9f8;--tf:#4d3f99}.c7{--tb:#eef3dc;--tf:#55701c}
+.welc{text-align:center;padding:30px 10px 8px}
+.welc .wleaf{width:92px;height:92px;margin:0 auto 14px;border-radius:50%;background:#fff;border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(31,94,59,.14)}
+.welc .wleaf svg{width:62px;height:62px}
+.welc h2{font-family:'Aref Ruqaa',serif;font-size:27px;margin:0;color:var(--brand)}
+.welc p{margin:6px 0 0;color:var(--muted);font-size:14px}
+.wbtn{display:flex;align-items:center;gap:14px;width:100%;margin-top:14px;padding:18px 16px;border-radius:18px;border:1px solid var(--line);background:#fff;cursor:pointer;text-align:start;box-shadow:0 2px 10px rgba(23,48,31,.05)}
+.wbtn.par{background:linear-gradient(135deg,#1f5e3b,#2b8055);border-color:#1f5e3b;color:#fff;box-shadow:0 10px 26px rgba(31,94,59,.25)}
+.wbtn .wic{width:54px;height:54px;flex-shrink:0;border-radius:16px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:27px}
+.wbtn.par .wic{background:rgba(255,255,255,.16)}
+.wbtn .wtx{flex:1;min-width:0}
+.wbtn .wtx b{display:block;font-size:18px}
+.wbtn .wtx small{display:block;margin-top:3px;font-size:12.5px;opacity:.8;line-height:1.6}
+.wbtn .war{font-size:24px;opacity:.6}
+.phero{margin-top:14px;border-radius:20px;padding:20px 18px 16px;color:#fff;background:linear-gradient(135deg,#1f5e3b 0%,#2b8055 70%,#3a9566 100%);box-shadow:0 10px 26px rgba(31,94,59,.22);position:relative;overflow:hidden}
+.phero:after{content:"";position:absolute;inset-inline-end:-36px;top:-36px;width:150px;height:150px;border-radius:50%;background:rgba(184,134,43,.28)}
+.phero small{display:block;font-size:13px;opacity:.85;position:relative;z-index:1}
+.phero b{display:block;font-family:'Aref Ruqaa',serif;font-size:28px;line-height:1.35;margin-top:2px;position:relative;z-index:1}
+.phero b i{font-style:normal;font-family:inherit;font-size:19px;opacity:.9}
+.phero span{display:inline-block;margin-top:8px;background:rgba(255,255,255,.16);border-radius:999px;padding:4px 12px;font-size:13px;position:relative;z-index:1}
+.pact{display:flex;gap:8px;margin-top:14px;position:relative;z-index:1}
+.pact button{border:1px solid rgba(255,255,255,.5);background:transparent;color:#fff;border-radius:999px;padding:6px 14px;font-size:13px;cursor:pointer}
+.cgrid,.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.ctile{border:0;border-radius:16px;padding:18px 12px;background:var(--tb);color:var(--tf);cursor:pointer;text-align:center;border-bottom:3px solid var(--tf)}
+.ctile b{display:block;font-size:16px}
+.ctile small{display:block;margin-top:3px;font-size:13px;opacity:.85}
+.stile{border:1px solid var(--line);border-radius:16px;padding:14px 10px 12px;background:#fff;cursor:pointer;text-align:center;box-shadow:0 2px 8px rgba(23,48,31,.04)}
+.stile .mono,.shero .mono{width:46px;height:46px;border-radius:14px;background:var(--tb);color:var(--tf);display:flex;align-items:center;justify-content:center;font-family:'Aref Ruqaa',serif;font-size:25px;font-weight:700;margin:0 auto 8px}
+.stile b{display:block;font-size:15px;color:var(--ink)}
+.stile em{display:block;font-style:normal;font-size:11.5px;color:var(--muted);margin-top:4px}
+.stile em.on{color:#fff;background:var(--tf);border-radius:999px;padding:2px 8px;display:inline-block;font-weight:600}
+.stile em.no{opacity:.7}
+.stile.empty{background:transparent;box-shadow:none;border-style:dashed}
+.stile.empty .mono{opacity:.45}
+.stile.empty b{color:var(--muted);font-weight:600}
+.pback{border:0;background:transparent;color:var(--brand2);font-weight:600;padding:14px 4px 4px;cursor:pointer;font-size:14px}
+.shero{display:flex;align-items:center;gap:14px;margin-top:6px;border-radius:20px;padding:18px 16px;background:var(--tb);border-inline-start:6px solid var(--tf)}
+.shero .mono{margin:0;width:58px;height:58px;font-size:31px;background:#fff;flex-shrink:0}
+.shero b{display:block;font-family:'Aref Ruqaa',serif;font-size:30px;line-height:1.3;color:var(--tf)}
+.shero small{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.lcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:10px;box-shadow:0 2px 8px rgba(23,48,31,.04)}
+.lcard.now{border-color:#b9d8c5;box-shadow:0 6px 18px rgba(31,94,59,.10)}
+.lcard.none{color:var(--muted);text-align:center;font-size:14px;box-shadow:none;border-style:dashed}
+.lcard .ph{font-size:12.5px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:8px}
+.lcard h3{margin:10px 0 6px;font-size:19px;line-height:1.5;color:var(--brand)}
+.lcard p{margin:0;line-height:1.9;font-size:15px;overflow-wrap:anywhere}
+.lcard .hw{margin-top:12px;background:#fffaf0;border:1px solid #ecd9a8;border-radius:12px;padding:9px 12px;font-size:14.5px;line-height:1.8;overflow-wrap:anywhere}
 .lcard .hw b{display:block;color:var(--accent);font-size:12.5px}
 .mrow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .mrow select{width:auto;flex:1;max-width:220px;padding:8px 10px}
@@ -184,7 +227,7 @@ input[type=text]#lfTitle{margin-top:0}
 var S = {boot:null, teacher:'', pin:'', month:'', sup:false, view:'login', home:null,
          cls:'', data:null, tab:'grades', subject:'', si:0, quick:0, group:0, item:0,
          acad:{}, edu:{}, det:{}, orig:{acad:{}, edu:{}, det:{}}, open:{}, dirty:false,
-         vinit:null, v:null, vItem:0, homes:{}, classes:{}, att:null, tk:null, tg:null, asSup:false, finit:null, f:null, li:null, lf:null, ls:null, lDay:'', parent:'', pl:null, plErr:''};
+         vinit:null, v:null, vItem:0, homes:{}, classes:{}, att:null, tk:null, tg:null, asSup:false, finit:null, f:null, li:null, lf:null, ls:null, lDay:'', parent:'', pl:null, plErr:'', pSub:'', pY:0};
 var app = document.getElementById('app');
 var NOTES = [{key:'أبرز ما تحسّن', label:'أبرز ما تحسّن'}, {key:'ما يحتاج متابعة', label:'ما يحتاج متابعة'}];
 var LEAVE = 'لديك تغييرات غير محفوظة. هل تريد المتابعة دون حفظ؟';
@@ -254,11 +297,11 @@ function start(){
     });
     return;
   }
-  if(cached){ S.boot=cached; S.month=thisMonth(cached.months,cached.currentMonth); renderLogin(); call('webBootstrap',[],function(b){ gotBoot(b); if(S.view==='login' && (JSON.stringify(b.teachers)!==JSON.stringify(cached.teachers) || !!b.parents!==!!cached.parents)) renderLogin(); },function(){},true); return; }
-  call('webBootstrap',[],function(b){ gotBoot(b); S.month=thisMonth(b.months,b.currentMonth); renderLogin(); }, cantLoad);
+  if(cached){ S.boot=cached; S.month=thisMonth(cached.months,cached.currentMonth); renderEntry(); call('webBootstrap',[],function(b){ gotBoot(b); var ch=JSON.stringify(b.teachers)!==JSON.stringify(cached.teachers) || !!b.parents!==!!cached.parents; if(ch && S.view==='login') renderLogin(); else if(ch && S.view==='welcome') renderEntry(); },function(){},true); return; }
+  call('webBootstrap',[],function(b){ gotBoot(b); S.month=thisMonth(b.months,b.currentMonth); renderEntry(); }, cantLoad);
 }
 function renderLogin(){
-  S.view='login';
+  S.view='login'; S.parent=''; ttlSub('');
   document.getElementById('savebar').style.display='none';
   document.getElementById('who').innerHTML='';
   var b=S.boot, t=b.teachers, opts='<option value="">— اختر اسمك —</option>';
@@ -270,8 +313,8 @@ function renderLogin(){
     '<label class="f">الشهر</label><select id="mSel">'+mo+'</select>'+
     '<button class="btn block" id="go">دخول</button>'+
     '<div class="hint">رمز الدخول أربعة أرقام تأخذه من الإدارة. يتذكّر هذا الجهاز دخولك، فلا تحتاج لكتابته مرة أخرى حتى تضغط «خروج».</div></div>'+
-    (b.parents && b.parents.length ? '<div class="card"><h2>أولياء الأمور</h2><div class="hint" style="margin-top:0">دروس صف ابنك/ابنتك اليوم وفي الأيام السابقة، بلا رمز دخول.</div><button class="btn ghost block" id="pGo">أنا ولي أمر</button></div>' : '');
-  var pg=document.getElementById('pGo'); if(pg) pg.onclick=function(){ renderParentPick(); };
+    (b.parents && b.parents.length ? '<button class="pback" id="lBack">› رجوع</button>' : '');
+  var lb=document.getElementById('lBack'); if(lb) lb.onclick=function(){ renderWelcome(); };
   var tSel=document.getElementById('tSel');
   function pinUi(){
     var x=t.filter(function(y){return y.name===tSel.value;})[0];
@@ -289,7 +332,8 @@ function renderLogin(){
 var navOn=false;
 window.addEventListener('popstate',function(){
   navOn=false;
-  if(S.view==='home'||S.view==='login'||S.view==='parent'||S.view==='ppick') return;
+  if(S.view==='psub'){ renderParent(); return; }
+  if(S.view==='home'||S.view==='login'||S.view==='parent'||S.view==='ppick'||S.view==='welcome') return;
   if(S.dirty && !confirm(LEAVE)){ navMark(); return; }
   setDirty(false); goHome();
 });
@@ -299,7 +343,7 @@ function who(){
   document.getElementById('who').innerHTML=esc(S.teacher)+' · '+esc(S.month)+'<br>'+
     (S.view!=='home'?'<a id="homeL">الرئيسية</a>':'')+'<a id="out">خروج</a>';
   var h=document.getElementById('homeL'); if(h) h.onclick=function(){ leave(goHome); };
-  document.getElementById('out').onclick=function(){ leave(function(){ S.cls=''; forget(); renderLogin(); }); };
+  document.getElementById('out').onclick=function(){ leave(function(){ S.cls=''; forget(); renderEntry(); }); };
 }
 
 // ---------------------------------------------------------------- home: my evaluations + visits
@@ -1454,23 +1498,40 @@ function bindLesHome(){
   var s=document.getElementById('lesSupGo'); if(s) s.onclick=function(){ openLesSup(''); };
 }
 
-// ---- parents: no login. ?class=<id> (or «أنا ولي أمر» on the login screen) → the class's lessons; the phone remembers the class
-function parentId(){ try{ var m=/[?&]class=([A-Za-z0-9]{1,12})/.exec(location.search||''); return m? m[1].toLowerCase() : ''; }catch(e){ return ''; } }
+// ---- entry: «ولي أمر» or «معلم/ة» (parents never see the teachers' list). Parents: no login — ?class=<id> or the class picker; the phone remembers the class
 var TTL_SUB='';
-function parentTop(){
+function ttlSub(t){ var ts=document.getElementById('ttlSub'); if(!ts) return; if(!TTL_SUB) TTL_SUB=ts.textContent; ts.textContent=t||TTL_SUB; }
+function renderEntry(){ if(S.boot && S.boot.parents && S.boot.parents.length) renderWelcome(); else renderLogin(); }
+function renderWelcome(){
+  S.view='welcome'; S.parent=''; ttlSub('دروس اليوم والمتابعة');
   document.getElementById('savebar').style.display='none';
-  var ts=document.getElementById('ttlSub'); if(ts){ if(!TTL_SUB) TTL_SUB=ts.textContent; ts.textContent='دروس اليوم — لأولياء الأمور'; }
-  document.getElementById('who').innerHTML='<a id="pSwitch">تغيير الصف</a><br><a id="pStaff">دخول المعلمين</a>';
-  document.getElementById('pSwitch').onclick=function(){ renderParentPick(); };
-  document.getElementById('pStaff').onclick=function(){ store('albaraem_parent',null); S.parent=''; var ts=document.getElementById('ttlSub'); if(ts && TTL_SUB) ts.textContent=TTL_SUB; try{ history.replaceState(null,'',location.pathname); }catch(e){} S.boot=null; start(); };
+  document.getElementById('who').innerHTML='';
+  app.innerHTML='<div class="welc"><div class="wleaf" aria-hidden="true"><svg viewBox="0 0 120 120"><path d="M60 114 C60 92 60 72 60 54" fill="none" stroke="#1F5E3B" stroke-width="7" stroke-linecap="round"/><path d="M60 86 C43 86 28 75 24 58 C42 58 56 69 60 86 Z" fill="#1F5E3B"/><path d="M60 74 C77 74 93 61 97 44 C78 44 64 57 60 74 Z" fill="#1F5E3B"/><path d="M60 54 C49 45 49 25 60 12 C71 25 71 45 60 54 Z" fill="#B8862B"/></svg></div>'+
+    '<h2>أهلًا بكم في مدرسة البراعم</h2><p>اختر طريقة الدخول</p></div>'+
+    '<button class="wbtn par" id="wParent"><span class="wic">👪</span><span class="wtx"><b>وليّ أمر</b><small>دروس صف ابنك/ابنتك، مادةً مادة — بلا رمز دخول</small></span><span class="war">‹</span></button>'+
+    '<button class="wbtn" id="wTeacher"><span class="wic">📋</span><span class="wtx"><b>معلّم/ة</b><small>دروس اليوم، والتقييم الشهري، والمتابعة</small></span><span class="war">‹</span></button>';
+  document.getElementById('wParent').onclick=function(){ renderParentPick(); };
+  document.getElementById('wTeacher').onclick=function(){ renderLogin(); };
+  window.scrollTo(0,0);
+}
+function parentId(){ try{ var m=/[?&]class=([A-Za-z0-9]{1,12})/.exec(location.search||''); return m? m[1].toLowerCase() : ''; }catch(e){ return ''; } }
+function parentExit(){
+  store('albaraem_parent',null); S.parent=''; S.pl=null; S.pSub=''; ttlSub('');
+  try{ history.replaceState(null,'',location.pathname); }catch(e){}
+  if(S.boot && S.boot.parents) renderWelcome(); else { S.boot=null; start(); }
+}
+function parentTop(){
+  document.getElementById('savebar').style.display='none'; ttlSub('دروس اليوم — لأولياء الأمور');
+  document.getElementById('who').innerHTML='<a id="pOut">خروج</a>';
+  document.getElementById('pOut').onclick=parentExit;
 }
 function renderParentPick(){
   S.view='ppick'; S.parent=S.parent||'pick'; parentTop();
   function draw(list){
-    var h='<div class="card"><h2>دروس اليوم — اختر صف ابنك/ابنتك</h2><div class="list">';
-    list.forEach(function(p){ h+='<div class="row"><div class="nm"><b>'+esc(p.label)+'</b></div><button class="btn sm" data-pc="'+esc(p.id)+'">فتح</button></div>'; });
-    h+='</div><div class="hint">يتذكّر هذا الهاتف الصف الذي تختاره، ويفتحه مباشرة في المرة القادمة.</div></div>';
-    app.innerHTML=h;
+    var h='<div class="phero"><small>أولياء الأمور</small><b>اختر صف ابنك/ابنتك</b></div><div class="cgrid">';
+    list.forEach(function(p,i){ var a=String(p.label).split(' — '); h+='<button class="ctile c'+(i%8)+'" data-pc="'+esc(p.id)+'"><b>'+esc(a[0])+'</b>'+(a[1]?'<small>'+esc(a[1])+'</small>':'')+'</button>'; });
+    h+='</div><div class="hint" style="text-align:center">يتذكّر هذا الهاتف الصف الذي تختاره، ويفتحه مباشرة في المرة القادمة.</div>';
+    app.innerHTML=h; window.scrollTo(0,0);
     app.querySelectorAll('[data-pc]').forEach(function(b){ b.onclick=function(){ openParent(b.getAttribute('data-pc')); }; });
   }
   if(S.boot && S.boot.parents){ draw(S.boot.parents); return; }
@@ -1479,45 +1540,72 @@ function renderParentPick(){
     function(m){ app.innerHTML='<div class="card"><h2>تعذّر الاتصال</h2><div class="hint" style="margin-top:0">'+esc(m||'تأكد من اتصال الإنترنت ثم أعد المحاولة.')+'</div><button class="btn block" onclick="location.reload()">إعادة المحاولة</button></div>'; });
 }
 function openParent(id){
-  S.parent=id; S.view='parent'; store('albaraem_parent',id); parentTop();
+  S.parent=id; S.view='parent'; S.pSub=''; store('albaraem_parent',id); parentTop();
   var c=jget('albaraem_pl_'+id);
   if(c && c.d){ S.pl=c; renderParent(); } else { S.pl=null; app.innerHTML=''; }
   parentFetch(!S.pl);
 }
 function parentFetch(loud){
   var id=S.parent; if(parentFetch.on) return; parentFetch.on=true;
-  call('webParentLessons',[id],function(d){ parentFetch.on=false; if(S.parent!==id) return; S.pl={d:d,at:Date.now()}; jput('albaraem_pl_'+id,S.pl); S.plErr=''; if(S.view==='parent') renderParent(); },
+  function again(){ if(S.view==='psub') renderParentSubject(true); else if(S.view==='parent') renderParent(); }
+  call('webParentLessons',[id],function(d){ parentFetch.on=false; if(S.parent!==id) return; S.pl={d:d,at:Date.now()}; jput('albaraem_pl_'+id,S.pl); S.plErr=''; again(); },
     function(m){ parentFetch.on=false; if(S.parent!==id) return;
-      if(/رابط الصف غير صحيح/.test(m||'')){ store('albaraem_parent',null); store('albaraem_pl_'+id,null); S.pl=null; S.plErr=m; renderParent(); return; }
-      S.plErr=/طلب غير معروف/.test(m||'')?'هذه الخدمة لم تُفعَّل بعد. حاول لاحقًا.':(m||'تعذّر الاتصال.'); if(S.view==='parent') renderParent(); }, !loud);
+      if(/رابط الصف غير صحيح/.test(m||'')){ store('albaraem_parent',null); store('albaraem_pl_'+id,null); S.pl=null; S.plErr=m; S.view='parent'; renderParent(); return; }
+      S.plErr=/طلب غير معروف/.test(m||'')?'هذه الخدمة لم تُفعَّل بعد. حاول لاحقًا.':(m||'تعذّر الاتصال.'); again(); }, !loud);
 }
-function plCard(x){
-  return '<div class="lcard"><div class="ph"><span class="badge">الحصة '+esc(x.p)+'</span> '+esc(x.subject)+'</div><h3>'+esc(x.title)+'</h3><p>'+lNl(x.text)+'</p>'+
+/** Lessons of the class grouped by subject (newest first); the subject list is the class's, then anything else that was posted. */
+function plSubjects(){
+  var d=S.pl.d, map={}, order=(d.subjects||[]).slice();
+  d.days.forEach(function(day){ day.lessons.forEach(function(x){ (map[x.subject]=map[x.subject]||[]).push({date:day.date,p:x.p,title:x.title,text:x.text,hw:x.hw}); if(order.indexOf(x.subject)<0) order.push(x.subject); }); });
+  return order.map(function(s,i){ var l=map[s]||[]; return {name:s, i:i, list:l, today:l.filter(function(x){return x.date===d.today;}).length, hw:l.some(function(x){return x.date===d.today && x.hw;})}; });
+}
+function plMono(s){ var w=String(s).split(' '); var k=(w.length>1 && /^(لغة|مهارات|تطبيقات|فقه|سيرة)$/.test(w[0]))? w[1] : w[0]; return k.replace(/^ال/,'').charAt(0); }
+function plLesson(x,today){
+  return '<div class="lcard'+(today?' now':'')+'"><div class="ph"><span class="badge">'+(today?'اليوم':esc(lLabel(x.date)))+'</span><span>الحصة '+esc(x.p)+'</span></div><h3>'+esc(x.title)+'</h3><p>'+lNl(x.text)+'</p>'+
     (x.hw?'<div class="hw"><b>الواجب</b>'+lNl(x.hw)+'</div>':'')+'</div>';
 }
 function renderParent(){
-  S.view='parent'; var c=S.pl, h='';
+  S.view='parent'; S.pSub=''; var c=S.pl, h='';
   if(!c){ app.innerHTML='<div class="card"><h2>دروس اليوم</h2><div class="hint" style="margin-top:0">'+esc(S.plErr||'جارٍ التحميل…')+'</div>'+
     (S.plErr?'<button class="btn block" id="pRetry">إعادة المحاولة</button><button class="btn ghost block" id="pPick">اختيار الصف</button>':'')+'</div>';
     var r=document.getElementById('pRetry'); if(r) r.onclick=function(){ S.plErr=''; renderParent(); parentFetch(true); };
     var k=document.getElementById('pPick'); if(k) k.onclick=renderParentPick; return; }
-  var d=c.d, t=d.days[0]||{lessons:[]}, stale=d.today!==localIso();
-  h+='<div class="card phead"><h2>'+esc(d.label)+'<span class="grow"></span><button class="btn ghost sm" id="pRef">تحديث</button></h2>'+
-     '<div class="hint" style="margin-top:0">ما أخذه الصف في كل حصة، كما كتبه المعلمون.'+(S.plErr?' <span class="warn">تعذّر التحديث الآن؛ هذه آخر نسخة محفوظة.</span>':'')+'</div></div>';
-  h+='<div class="pday today">'+(stale?esc(lLabel(d.today)):'اليوم — '+esc(lLabel(d.today)))+'</div>';
-  if(t.date===d.today && t.lessons.length) h+=t.lessons.map(plCard).join('');
-  else h+='<div class="card"><div class="hint" style="margin-top:0">'+(d.school?'لم تُنزَّل دروس اليوم بعد. تُضاف الدروس خلال اليوم الدراسي وبعده.':'لا دوام اليوم.')+'</div></div>';
-  var old=d.days.filter(function(x){ return x.date!==d.today && x.lessons.length; });
-  if(old.length){ h+='<div class="pday sep">الأيام السابقة</div>'; old.forEach(function(x){ h+='<div class="pday">'+esc(lLabel(x.date))+'</div>'+x.lessons.map(plCard).join(''); }); }
-  h+=installCard();
-  app.innerHTML=h;
+  var d=c.d, subs=plSubjects(), nToday=0; subs.forEach(function(s){ nToday+=s.today; });
+  var a=String(d.label).split(' — ');
+  h+='<div class="phero"><small>'+esc(lLabel(d.today))+'</small><b>'+esc(a[0])+(a[1]?' <i>'+esc(a[1])+'</i>':'')+'</b>'+
+     '<span>'+(nToday? 'نُزّل اليوم '+nToday+(nToday===1?' درس':nToday===2?' درسان':nToday<=10?' دروس':' درسًا') : (d.school?'لم تُنزَّل دروس اليوم بعد':'لا دوام اليوم'))+'</span>'+
+     '<div class="pact"><button id="pRef">تحديث</button><button id="pSwitch">تغيير الصف</button></div></div>';
+  if(S.plErr) h+='<div class="banner">تعذّر التحديث الآن؛ هذه آخر نسخة محفوظة على الهاتف.</div>';
+  h+='<div class="pday">اختر المادة</div><div class="sgrid">';
+  subs.slice().sort(function(x,y){ return (y.today?1:0)-(x.today?1:0) || (y.list.length?1:0)-(x.list.length?1:0) || x.i-y.i; }).forEach(function(s){
+    var st = s.today ? '<em class="on">درس اليوم'+(s.hw?' · واجب':'')+'</em>' : s.list.length ? '<em>آخر درس: '+esc(lLabel(s.list[0].date))+'</em>' : '<em class="no">لا دروس هذا الأسبوع</em>';
+    h+='<button class="stile c'+(s.i%8)+(s.list.length?'':' empty')+'" data-ps="'+esc(s.name)+'"><span class="mono">'+esc(plMono(s.name))+'</span><b>'+esc(s.name)+'</b>'+st+'</button>'; });
+  h+='</div><div class="hint" style="text-align:center">اضغط على المادة لترى درس اليوم ودروس الأيام السابقة.</div>'+installCard();
+  app.innerHTML=h; window.scrollTo(0,S.pY||0); S.pY=0;
   document.getElementById('pRef').onclick=function(){ parentFetch(true); };
+  document.getElementById('pSwitch').onclick=function(){ renderParentPick(); };
+  app.querySelectorAll('[data-ps]').forEach(function(b){ b.onclick=function(){ S.pY=window.scrollY; S.pSub=b.getAttribute('data-ps'); try{ history.pushState({albaraem:'psub'},''); }catch(e){} renderParentSubject(); }; });
   var di=document.getElementById('doInstall'); if(di) di.onclick=function(){ if(!deferredInstall) return; deferredInstall.prompt(); deferredInstall.userChoice.then(function(){ deferredInstall=null; renderParent(); }); };
   var hi=document.getElementById('hideInstall'); if(hi) hi.onclick=function(){ store('albaraem_install_hide','1'); renderParent(); };
 }
+function renderParentSubject(keepScroll){
+  var y=window.scrollY; S.view='psub';
+  var d=S.pl.d, s=plSubjects().filter(function(x){ return x.name===S.pSub; })[0];
+  if(!s){ renderParent(); return; }
+  var a=String(d.label).split(' — '), h='<button class="pback" id="pBack">› المواد</button>'+
+    '<div class="shero c'+(s.i%8)+'"><span class="mono">'+esc(plMono(s.name))+'</span><div><b>'+esc(s.name)+'</b><small>'+esc(a.join(' · '))+'</small></div></div>';
+  var t=s.list.filter(function(x){ return x.date===d.today; }), old=s.list.filter(function(x){ return x.date!==d.today; });
+  h+='<div class="pday today">اليوم — '+esc(lLabel(d.today))+'</div>';
+  if(t.length) h+=t.sort(function(x,y){return x.p-y.p;}).map(function(x){ return plLesson(x,true); }).join('');
+  else h+='<div class="lcard none">لا درس في هذه المادة اليوم.</div>';
+  if(old.length){ h+='<div class="pday sep">الأيام السابقة</div>'+old.map(function(x){ return plLesson(x,false); }).join(''); }
+  else h+='<div class="hint" style="text-align:center;margin-top:16px">لا دروس سابقة في آخر '+(d.keep||7)+' أيام.</div>';
+  app.innerHTML=h; window.scrollTo(0,keepScroll?y:0);
+  document.getElementById('pBack').onclick=function(){ renderParent(); };
+}
 document.addEventListener('visibilitychange',function(){
   if(document.visibilityState!=='visible') return;
-  if(S.view==='parent' && S.pl && Date.now()-(S.pl.at||0)>60000) parentFetch(false);
+  if((S.view==='parent'||S.view==='psub') && S.pl && Date.now()-(S.pl.at||0)>60000) parentFetch(false);
   if(S.view==='lessons' && S.pin) lesRefresh();
 });
 
