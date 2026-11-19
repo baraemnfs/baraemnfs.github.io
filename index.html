@@ -140,6 +140,21 @@ footer.save .st.err{color:var(--warn);font-weight:600}
 .mty button.on{background:var(--brand);border-color:var(--brand);color:#fff}
 .mstat{font-size:13.5px;line-height:1.9}
 .install h2{color:var(--gold)}
+.lta{min-height:120px}
+.lhid .nm{opacity:.55}
+input[type=text]#lfTitle{margin-top:0}
+.row.ltext{border-top:0;padding-top:0}
+.row.ltext .nm small{white-space:normal;line-height:1.7;font-size:12.5px}
+.row.lrow .nm b{white-space:normal}
+.pday{margin:18px 4px 8px;font-weight:700;color:var(--brand);font-size:14.5px}
+.pday.today{font-size:16px}
+.pday.sep{margin-top:26px;padding-top:14px;border-top:1px dashed var(--line);color:var(--muted);font-weight:600}
+.lcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:10px}
+.lcard .ph{font-size:13px;color:var(--muted);font-weight:600}
+.lcard h3{margin:8px 0 4px;font-size:16px;line-height:1.5}
+.lcard p{margin:0;line-height:1.8;font-size:14.5px;overflow-wrap:anywhere}
+.lcard .hw{margin-top:10px;background:#fffaf0;border:1px solid #ecd9a8;border-radius:10px;padding:8px 12px;font-size:14px;line-height:1.8;overflow-wrap:anywhere}
+.lcard .hw b{display:block;color:var(--accent);font-size:12.5px}
 .mrow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .mrow select{width:auto;flex:1;max-width:220px;padding:8px 10px}
 .mrow span{font-size:13px;color:var(--muted)}
@@ -156,7 +171,7 @@ footer.save .st.err{color:var(--warn);font-weight:600}
 <body>
 <header class="top"><div class="in">
   <div class="logo" aria-hidden="true"><svg viewBox="0 0 120 120"><path d="M60 114 C60 92 60 72 60 54" fill="none" stroke="#1F5E3B" stroke-width="7" stroke-linecap="round"/><path d="M60 86 C43 86 28 75 24 58 C42 58 56 69 60 86 Z" fill="#1F5E3B"/><path d="M60 74 C77 74 93 61 97 44 C78 44 64 57 60 74 Z" fill="#1F5E3B"/><path d="M60 54 C49 45 49 25 60 12 C71 25 71 45 60 54 Z" fill="#B8862B"/></svg></div>
-  <div><h1 id="ttl">مدرسة البراعم</h1><small>صفحة المعلم — المتابعة الشهرية وزيارات الحصص</small></div>
+  <div><h1 id="ttl">مدرسة البراعم</h1><small id="ttlSub">صفحة المعلم — المتابعة الشهرية وزيارات الحصص</small></div>
   <div class="who" id="who"></div>
 </div></header>
 <div class="wrap" id="app"></div>
@@ -169,7 +184,7 @@ footer.save .st.err{color:var(--warn);font-weight:600}
 var S = {boot:null, teacher:'', pin:'', month:'', sup:false, view:'login', home:null,
          cls:'', data:null, tab:'grades', subject:'', si:0, quick:0, group:0, item:0,
          acad:{}, edu:{}, det:{}, orig:{acad:{}, edu:{}, det:{}}, open:{}, dirty:false,
-         vinit:null, v:null, vItem:0, homes:{}, classes:{}, att:null, tk:null, tg:null, asSup:false, finit:null, f:null};
+         vinit:null, v:null, vItem:0, homes:{}, classes:{}, att:null, tk:null, tg:null, asSup:false, finit:null, f:null, li:null, lf:null, ls:null, lDay:'', parent:'', pl:null, plErr:''};
 var app = document.getElementById('app');
 var NOTES = [{key:'أبرز ما تحسّن', label:'أبرز ما تحسّن'}, {key:'ما يحتاج متابعة', label:'ما يحتاج متابعة'}];
 var LEAVE = 'لديك تغييرات غير محفوظة. هل تريد المتابعة دون حفظ؟';
@@ -203,7 +218,7 @@ function call(fn,args,ok,onFail,quiet){
     });
 }
 function store(k,v){try{ if(v===undefined) return localStorage.getItem(k); if(v===null) localStorage.removeItem(k); else localStorage.setItem(k,v);}catch(e){return null;}}
-function forget(){ store('albaraem_pin',null); store('albaraem_home',null); S.pin=''; S.homes={}; S.classes={}; S.home=null; S.att=null; S.attAt=0; S.attBusy=false; S.vinit=null; S.v=null; S.tk=null; S.tg=null; S.mi=null; S.mt=null; S.dirty=false; }
+function forget(){ store('albaraem_pin',null); store('albaraem_home',null); S.pin=''; S.homes={}; S.classes={}; S.home=null; S.att=null; S.attAt=0; S.attBusy=false; S.vinit=null; S.v=null; S.tk=null; S.tg=null; S.mi=null; S.mt=null; S.li=null; S.lf=null; S.ls=null; S.dirty=false; }
 function jget(k){ try{ return JSON.parse(store(k)||'null'); }catch(e){ return null; } }
 function jput(k,v){ try{ store(k,JSON.stringify(v)); }catch(e){} }
 function thisMonth(months,fallback){ var d=new Date(), m=(d.getMonth()+1)+'/'+d.getFullYear(); return months.indexOf(m)>=0 ? m : (fallback && months.indexOf(fallback)>=0 ? fallback : months[0]); }
@@ -218,8 +233,11 @@ window.addEventListener('beforeunload',function(e){ if(S.dirty){e.preventDefault
 // ---------------------------------------------------------------- login
 function start(){
   function cantLoad(){ load(false); app.innerHTML='<div class="card"><h2>تعذّر تحميل الصفحة</h2><div class="hint" style="margin-top:0">تأكد من اتصال الإنترنت ثم أعد المحاولة.'+(IS_APP?'':' إذا كنت مسجّلًا بأكثر من حساب Google في هذا المتصفح، افتح الرابط في نافذة خاصة (Incognito) أو من الجوال.')+'</div><button class="btn block" onclick="location.reload()">إعادة المحاولة</button></div>'; }
-  setTimeout(function(){ if(!S.boot && !S.home) cantLoad(); }, 15000);
+  setTimeout(function(){ if(!S.boot && !S.home && !S.parent) cantLoad(); }, 15000);
   var cached=jget('albaraem_boot'), savedPin=store('albaraem_pin');
+  // a parent: the class link, or the class this phone opened last (a signed-in teacher's phone stays the teacher's)
+  var pid=parentId() || (savedPin===null ? (store('albaraem_parent')||'') : '');
+  if(pid){ if(cached) S.boot=cached; openParent(pid); return; }
   S.teacher=store('albaraem_teacher')||'';
   function known(b){ return b && b.teachers.some(function(x){return x.name===S.teacher;}); }
   function gotBoot(b){ S.boot=b; jput('albaraem_boot',b); }
@@ -236,7 +254,7 @@ function start(){
     });
     return;
   }
-  if(cached){ S.boot=cached; S.month=thisMonth(cached.months,cached.currentMonth); renderLogin(); call('webBootstrap',[],function(b){ gotBoot(b); if(S.view==='login' && JSON.stringify(b.teachers)!==JSON.stringify(cached.teachers)) renderLogin(); },function(){},true); return; }
+  if(cached){ S.boot=cached; S.month=thisMonth(cached.months,cached.currentMonth); renderLogin(); call('webBootstrap',[],function(b){ gotBoot(b); if(S.view==='login' && (JSON.stringify(b.teachers)!==JSON.stringify(cached.teachers) || !!b.parents!==!!cached.parents)) renderLogin(); },function(){},true); return; }
   call('webBootstrap',[],function(b){ gotBoot(b); S.month=thisMonth(b.months,b.currentMonth); renderLogin(); }, cantLoad);
 }
 function renderLogin(){
@@ -251,7 +269,9 @@ function renderLogin(){
     '<div id="pinBox"></div>'+
     '<label class="f">الشهر</label><select id="mSel">'+mo+'</select>'+
     '<button class="btn block" id="go">دخول</button>'+
-    '<div class="hint">رمز الدخول أربعة أرقام تأخذه من الإدارة. يتذكّر هذا الجهاز دخولك، فلا تحتاج لكتابته مرة أخرى حتى تضغط «خروج».</div></div>';
+    '<div class="hint">رمز الدخول أربعة أرقام تأخذه من الإدارة. يتذكّر هذا الجهاز دخولك، فلا تحتاج لكتابته مرة أخرى حتى تضغط «خروج».</div></div>'+
+    (b.parents && b.parents.length ? '<div class="card"><h2>أولياء الأمور</h2><div class="hint" style="margin-top:0">دروس صف ابنك/ابنتك اليوم وفي الأيام السابقة، بلا رمز دخول.</div><button class="btn ghost block" id="pGo">أنا ولي أمر</button></div>' : '');
+  var pg=document.getElementById('pGo'); if(pg) pg.onclick=function(){ renderParentPick(); };
   var tSel=document.getElementById('tSel');
   function pinUi(){
     var x=t.filter(function(y){return y.name===tSel.value;})[0];
@@ -269,7 +289,7 @@ function renderLogin(){
 var navOn=false;
 window.addEventListener('popstate',function(){
   navOn=false;
-  if(S.view==='home'||S.view==='login') return;
+  if(S.view==='home'||S.view==='login'||S.view==='parent'||S.view==='ppick') return;
   if(S.dirty && !confirm(LEAVE)){ navMark(); return; }
   setDirty(false); goHome();
 });
@@ -303,7 +323,7 @@ function goHome(){
 function renderHome(){
   S.view='home'; S.asSup=false; who(); setTimeout(prefetchClasses, 600); setTimeout(obFlush, 300);
   document.getElementById('savebar').style.display='none';
-  var h=S.home, done={}, html=installCard()+attCard()+rolesCard()+'<div class="card"><h2>تقييماتي الشهرية</h2>'+
+  var h=S.home, done={}, html=installCard()+attCard()+lesHomeCard()+rolesCard()+'<div class="card"><h2>تقييماتي الشهرية</h2>'+
     '<div class="mrow"><span>الشهر</span><select id="hMonth">'+S.boot.months.map(function(m){return '<option value="'+esc(m)+'"'+(m===S.month?' selected':'')+'>'+esc(m)+'</option>';}).join('')+'</select></div>';
   if(h.classes.length){
     html+='<div class="list">';
@@ -355,7 +375,7 @@ function renderHome(){
   var nf=document.getElementById('newF'); if(nf) nf.onclick=function(){ openFam(null); };
   var nv=document.getElementById('newV'); if(nv) nv.onclick=function(){ openVisit(''); };
   document.getElementById('hMonth').onchange=function(){ S.month=this.value; goHome(); };
-  bindInstall(); bindAtt(); bindRoles();
+  bindInstall(); bindAtt(); bindRoles(); bindLesHome(); setTimeout(lobFlush, 400);
   var a=S.home.adm; if(a && a.att && a.started && !S.attBusy && (!S.att || Date.now()-(S.attAt||0)>60000)) attFetch();
 }
 
@@ -1213,7 +1233,295 @@ function saveVisit(){
   });
 }
 
-document.getElementById('saveBtn').onclick=function(){ if(busy>0) return; if(S.view==='visit') saveVisit(); else if(S.view==='tasks') saveTasks(); else if(S.view==='tg') saveTg(); else if(S.view==='fam') saveFam(); else if(S.view==='meet') saveMeet(); else saveClass(); };
+// ---------------------------------------------------------------- «دروس اليوم»: teachers post, supervisors follow up, parents read
+var LDAYS=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+function lDate(iso){ var m=String(iso||'').split('-'); return new Date(+m[0],+m[1]-1,+m[2],12); }
+function lIso(d){ var p=function(n){return (n<10?'0':'')+n;}; return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+function lDayName(iso){ return LDAYS[lDate(iso).getDay()]; }
+function lLabel(iso){ var m=String(iso).split('-'); return lDayName(iso)+' '+(+m[2])+'/'+(+m[1]); }
+function lAdd(iso,n){ var d=lDate(iso); d.setDate(d.getDate()+n); return lIso(d); }
+function lBase(c){ var I=S.li; return I && c.indexOf(I.kg+' - ')===0 ? I.kg : c; }
+function lOverlap(a,b){ if(a===b) return true; var I=S.li; if(!I) return false; return (a===I.kg && lBase(b)===I.kg) || (b===I.kg && lBase(a)===I.kg); }
+function lNl(s){ return esc(s).replace(/\n/g,'<br>'); }
+
+/* Lessons outbox: a save or a delete is kept on the phone first and sent in order; the id is made here, so a repeated send never doubles a lesson. */
+function lobGet(){ return jget('albaraem_les_outbox')||[]; }
+function lobSet(a){ jput('albaraem_les_outbox',a); }
+function lobMine(){ return lobGet().filter(function(x){ return x.who===S.teacher; }); }
+function lobFlush(force){
+  if(lobFlush.on || !S.pin) return;
+  var a=lobGet(), k=-1;
+  for(var i=0;i<a.length;i++){ if(a[i].who===S.teacher && (force || !a[i].err)){ k=i; break; } }
+  if(k<0) return;
+  var x=a[k]; lobFlush.on=true;
+  function done(err,net){
+    lobFlush.on=false;
+    var b=lobGet(), j=-1; b.forEach(function(y,q){ if(y.k===x.k) j=q; });
+    if(j>=0){ if(!err) b.splice(j,1); else if(net){ b[j].n=(b[j].n||0)+1; delete b[j].err; } else b[j].err=err; }
+    lobSet(b);
+    if(S.view==='lessons') renderLessons(true);
+    if(!err){ if(lobMine().some(function(y){return !y.err;})) setTimeout(function(){ lobFlush(); },50); else lesRefresh(); }
+    else if(net) setTimeout(function(){ lobFlush(); }, Math.min(60000, 4000*Math.pow(2,Math.min(4,(j>=0&&b[j].n)||1))));
+    else setTimeout(function(){ lobFlush(); },50);   // go on with the next one; this one waits for the teacher
+  }
+  function fail(m){ done(m||'خطأ', !m || /تعذّر الاتصال|انتهت مهلة/.test(m)); }
+  if(x.op==='del') call('webLessonDelete',[S.teacher,S.pin,x.id],function(){ done(''); },fail,true);
+  else { var p=clone(x.p); p.name=S.teacher; p.pin=S.pin; call('webLessonSave',[p],function(){ done(''); },fail,true); }
+}
+window.addEventListener('online',function(){ lobFlush(true); });
+/** The server's list with this phone's waiting saves and deletes applied on top. */
+function lesMine(){
+  var I=S.li, list=(I.mine||[]).map(function(x){ return clone(x); });
+  lobMine().forEach(function(x){
+    var j=-1; list.forEach(function(y,q){ if(y.id===x.id) j=q; });
+    if(x.op==='del'){ if(j>=0) list.splice(j,1); return; }
+    var o={id:x.id,date:x.p.date,cls:x.p.cls,subject:x.p.subject,p:+x.p.period,title:x.p.title,text:x.p.text,hw:x.p.hw,teacher:x.p.owner||S.teacher,edit:true,wait:true,err:x.err||''};
+    if(j>=0){ o.hidden=list[j].hidden; o.by=list[j].by; list[j]=o; } else if(!x.p.owner) list.push(o);
+  });
+  list.sort(function(a,b){ return a.date<b.date?1:a.date>b.date?-1:a.p-b.p; });
+  return list;
+}
+function lesDays(){
+  // this week, Sunday → today (school days of the timetable, and today)
+  var I=S.li, t=localIso(), d=lDate(t), out=[], w=d.getDay();
+  for(var k=w;k>=0;k--){ var iso=lAdd(t,-k), nm=lDayName(iso); if((I.schoolDays||[]).indexOf(nm)>=0 || k===0) out.push(iso); }
+  return out;
+}
+function lesCanEdit(){ return true; }   // the whole week, Friday and Saturday included; the server refuses older weeks
+function lesRefresh(){
+  if(!S.pin) return; var who0=S.teacher;
+  call('webLessonsInit',[S.teacher,S.pin],function(I){ if(S.teacher!==who0) return; S.li=I; jput('albaraem_les',{who:who0,I:I}); if(S.view==='lessons') renderLessons(true); },function(){},true);
+}
+function openLessons(){
+  var c=jget('albaraem_les');
+  S.lDay='';   // chosen in renderLessons: today, or on Friday / Saturday the last school day
+  if(c && c.who===S.teacher && c.I){ S.li=c.I; renderLessons(); lesRefresh(); lobFlush(); return; }
+  call('webLessonsInit',[S.teacher,S.pin],function(I){ S.li=I; jput('albaraem_les',{who:S.teacher,I:I}); renderLessons(); lobFlush(); });
+}
+function lesRow(x,sup){
+  var h='<div class="row lrow'+(x.hidden?' lhid':'')+'"><div class="nm"><b>الحصة '+esc(x.p)+' · '+esc(x.cls)+' · '+esc(x.subject)+'</b>'+
+    '<small>'+(sup?esc(x.teacher)+' · ':'')+esc(x.title)+'</small>'+
+    (x.err?'<i>⚠️ لم يُقبل: '+esc(x.err)+'</i>':x.wait?'<i class="none">⏳ بانتظار الإنترنت — يُرسل تلقائيًا</i>':'')+
+    (x.hidden?'<i>مخفي عن الأهل'+(x.by?' — أخفاه '+esc(x.by):'')+'</i>':'')+'</div>';
+  if(sup) h+='<button class="btn ghost sm" data-lhide="'+esc(x.id)+'" data-h="'+(x.hidden?'0':'1')+'">'+(x.hidden?'إظهار':'إخفاء')+'</button>';
+  if(x.edit||sup) h+='<button class="btn ghost sm" data-ledit="'+esc(x.id)+'">تعديل</button>';
+  return h+'</div>';
+}
+function renderLessons(keepScroll){
+  var y=window.scrollY;
+  S.view='lessons'; who(); document.getElementById('savebar').style.display='none';
+  var I=S.li, days=lesDays(), today=localIso(), mine=lesMine(), can=lesCanEdit();
+  if(days.indexOf(S.lDay)<0){ S.lDay=today; if((I.schoolDays||[]).indexOf(lDayName(today))<0 && days.length>1) S.lDay=days[days.length-2]; }
+  var h='<div class="card"><h2>دروس اليوم<span class="grow"></span>'+(can?'<button class="btn sm" id="lNew">＋ درس آخر</button>':'')+'</h2>';
+  if(days.length>1){ h+='<div class="chips small" style="margin-bottom:10px">'; days.forEach(function(d){ h+='<button class="chip'+(d===S.lDay?' on':'')+'" data-lday="'+d+'">'+(d===today?'اليوم':esc(lLabel(d)))+'</button>'; }); h+='</div>'; }
+  var dn=lDayName(S.lDay), slots=(I.slots||[]).filter(function(s){ return s.day===dn; });
+  h+='<div class="sub" style="margin-top:0"><div class="lbl">حصصي — '+esc(lLabel(S.lDay))+'</div>';
+  if(slots.length){ h+='<div class="list">';
+    slots.forEach(function(s,i){
+      var m=mine.filter(function(x){ return x.date===S.lDay && x.p===s.p && lOverlap(x.cls,s.cls); })[0];
+      var o=!m && (I.done||[]).filter(function(x){ return x.date===S.lDay && x.p===s.p && lOverlap(x.cls,s.cls); })[0];
+      h+='<div class="row'+(m||o?' done':'')+'"><div class="nm"><b>الحصة '+s.p+' · '+esc(s.cls)+'</b><small>'+esc(s.subject)+(s.req?'':' · اختياري')+
+        (m?' · '+esc(m.title):'')+(o?' · نزّلها '+esc(o.teacher):'')+'</small>'+(m&&m.err?'<i>⚠️ لم يُقبل: '+esc(m.err)+'</i>':m&&m.wait?'<i class="none">⏳ بانتظار الإنترنت</i>':'')+'</div>';
+      if(m) h+='<span class="okc">✓</span>'+(m.edit?'<button class="btn ghost sm" data-ledit="'+esc(m.id)+'">تعديل</button>':'');
+      else if(o) h+='<span class="okc">✓</span>';
+      else if(can) h+='<button class="btn sm" data-lslot="'+i+'">نزّل الدرس</button>';
+      h+='</div>'; });
+    h+='</div>'; }
+  else h+='<div class="hint" style="margin-top:0">لا حصص لك في جدول هذا اليوم. إن أعطيت حصة فاضغط «＋ درس آخر».</div>';
+  h+='</div>';
+  if(!can) h+='<div class="banner">أُغلق تنزيل دروس هذا الأسبوع (التنزيل والتعديل حتى نهاية السبت). للتعديل راجع المشرف.</div>';
+  h+='<div class="hint">اكتب لكل حصة عنوان الدرس وما شُرح فيه والواجب إن وُجد. يظهر الدرس للأهل فور الحفظ، دون اسمك ودون أي اسم طالب. يُنزَّل ويُعدَّل ويُحذف حتى نهاية السبت من الأسبوع نفسه.</div></div>';
+  var extra=mine.filter(function(x){ return !(x.date===S.lDay && slots.some(function(s){ return x.p===s.p && lOverlap(x.cls,s.cls); })); });
+  if(extra.length){
+    h+='<div class="card"><h2>ما نزّلته</h2>'; var last='';
+    extra.forEach(function(x){ if(x.date!==last){ if(last) h+='</div>'; h+='<div class="sub"'+(last?'':' style="margin-top:0"')+'><div class="lbl">'+esc(lLabel(x.date))+'</div></div><div class="list">'; last=x.date; } h+=lesRow(x,false); });
+    h+='</div></div>';
+  }
+  if(I.sup) h+='<div class="card"><h2>متابعة الدروس (المشرف)</h2><div class="hint" style="margin-top:0">كل ما نُزّل في يوم، والحصص التي لم يُنزَّل درسها، وإخفاء درس عن الأهل أو إظهاره.</div><button class="btn block" id="lSup">فتح المتابعة</button></div>';
+  app.innerHTML=h;
+  var n=document.getElementById('lNew'); if(n) n.onclick=function(){ lesForm({date:S.lDay}); };
+  app.querySelectorAll('[data-lday]').forEach(function(b){ b.onclick=function(){ S.lDay=b.getAttribute('data-lday'); renderLessons(); }; });
+  app.querySelectorAll('[data-lslot]').forEach(function(b){ b.onclick=function(){ var s=slots[+b.getAttribute('data-lslot')]; lesForm({date:S.lDay,cls:s.cls,subject:s.subject.split('/')[0].trim(),period:s.p}); }; });
+  app.querySelectorAll('[data-ledit]').forEach(function(b){ b.onclick=function(){ var id=b.getAttribute('data-ledit'), x=mine.filter(function(y){return y.id===id;})[0]; if(x) lesForm({id:x.id,date:x.date,cls:x.cls,subject:x.subject,period:x.p,title:x.title,text:x.text,hw:x.hw}); }; });
+  var sp=document.getElementById('lSup'); if(sp) sp.onclick=function(){ openLesSup(''); };
+  if(keepScroll) window.scrollTo(0,y); else window.scrollTo(0,0);
+}
+/** One lesson: new (from a timetable slot or free) or an edit. f.owner is set when a supervisor edits someone else's lesson. */
+function lesForm(f){
+  S.lf={id:f.id||'',date:f.date||localIso(),cls:f.cls||'',subject:f.subject||'',period:f.period||'',title:f.title||'',text:f.text||'',hw:f.hw||'',owner:f.owner||'',back:f.back||''};
+  setDirty(false); renderLesson();
+}
+function renderLesson(){
+  S.view='lesson'; who(); var I=S.li, f=S.lf, days=lesDays();
+  document.getElementById('savebar').style.display='block';
+  if(days.indexOf(f.date)<0) days=[f.date].concat(days);
+  var base=lBase(f.cls), grp=f.cls===base?'':f.cls.slice(base.length+3), subs=(I.subjects[f.cls]||[]);
+  var h='<div class="card"><h2>'+(f.id?'تعديل درس':'درس جديد')+(f.owner?' — '+esc(f.owner):'')+'</h2>';
+  h+='<div class="grid2"><div><label class="f">اليوم</label><select id="lfDate">'+days.map(function(d){ return '<option value="'+d+'"'+(d===f.date?' selected':'')+'>'+esc(lLabel(d))+(d===localIso()?' (اليوم)':'')+'</option>'; }).join('')+'</select></div>';
+  h+='<div><label class="f">الحصة</label><select id="lfP"><option value="">— اختر —</option>'; for(var k=1;k<=I.periods;k++) h+='<option'+(String(f.period)===String(k)?' selected':'')+'>'+k+'</option>'; h+='</select></div></div>';
+  h+='<label class="f">الصف</label><select id="lfCls"><option value="">— اختر —</option>'+I.classes.map(function(c){ return '<option'+(c===base?' selected':'')+'>'+esc(c)+'</option>'; }).join('')+'</select>';
+  if(base===I.kg) h+='<label class="f">الحصة لمن؟</label><div class="mty" id="lfGrp"><button data-g=""'+(grp===''?' class="on"':'')+'>الصف كله</button>'+I.groups.map(function(g){ return '<button data-g="'+esc(g)+'"'+(grp===g?' class="on"':'')+'>'+esc(g)+' فقط</button>'; }).join('')+'</div>';
+  h+='<label class="f">المادة</label><select id="lfSub"><option value="">— اختر —</option>'+subs.map(function(s){ return '<option'+(s===f.subject?' selected':'')+'>'+esc(s)+'</option>'; }).join('')+'</select>';
+  h+='<label class="f">عنوان الدرس</label><input type="text" id="lfTitle" maxlength="150" value="'+esc(f.title)+'" placeholder="مثال: الجمع ضمن 20">';
+  h+='<label class="f">ما تم شرحه</label><textarea class="why lta" id="lfText" maxlength="2000" placeholder="ما أخذه الطلاب في هذه الحصة">'+esc(f.text)+'</textarea>';
+  h+='<label class="f">الواجب <span style="font-weight:400">(اختياري)</span></label><textarea class="why" id="lfHw" maxlength="1000" placeholder="إن وُجد">'+esc(f.hw)+'</textarea>';
+  h+='<div class="hint">يظهر للأهل: المادة، وعنوان الدرس، وما شُرح، والواجب. لا تكتب اسم أي طالب.</div>';
+  if(f.id) h+='<button class="btn danger block" id="lfDel">حذف هذا الدرس</button>';
+  h+='</div>';
+  app.innerHTML=h;
+  function grab(){ f.title=document.getElementById('lfTitle').value; f.text=document.getElementById('lfText').value; f.hw=document.getElementById('lfHw').value; f.period=document.getElementById('lfP').value; f.date=document.getElementById('lfDate').value; f.subject=document.getElementById('lfSub').value; }
+  ['lfTitle','lfText','lfHw'].forEach(function(id){ document.getElementById(id).oninput=function(){ grab(); setDirty(true); }; });
+  ['lfP','lfDate','lfSub'].forEach(function(id){ document.getElementById(id).onchange=function(){ grab(); setDirty(true); }; });
+  document.getElementById('lfCls').onchange=function(){ grab(); f.cls=this.value; if((I.subjects[f.cls]||[]).indexOf(f.subject)<0) f.subject=''; setDirty(true); keep(renderLesson); };
+  app.querySelectorAll('#lfGrp button').forEach(function(b){ b.onclick=function(){ grab(); var g=b.getAttribute('data-g'); f.cls=g?I.kg+' - '+g:I.kg; setDirty(true); keep(renderLesson); }; });
+  var d=document.getElementById('lfDel'); if(d) d.onclick=function(){
+    if(!confirm('حذف هذا الدرس؟ سيختفي من صفحة الأهل.')) return;
+    if(f.owner){ call('webLessonDelete',[S.teacher,S.pin,f.id],function(){ setDirty(false); toast('حُذف الدرس'); lesBack(); }); return; }
+    var a=lobGet().filter(function(x){ return !(x.who===S.teacher && x.id===f.id); });
+    var known=(S.li.mine||[]).some(function(x){return x.id===f.id;}) || !!f.owner;
+    if(known) a.push({k:'k'+Date.now()+Math.random(),who:S.teacher,op:'del',id:f.id});
+    lobSet(a); setDirty(false); lesBack(); lobFlush(true); toast('حُذف الدرس');
+  };
+}
+function lesBack(){ if(S.lf && S.lf.back==='sup'){ openLesSup(S.ls?S.ls.date:''); } else renderLessons(); }
+function saveLesson(){
+  var f=S.lf, miss=!f.cls?'lfCls':!f.period?'lfP':!f.subject?'lfSub':!String(f.title).trim()?'lfTitle':!String(f.text).trim()?'lfText':'';
+  if(miss){ var el=document.getElementById(miss); status('err','أكمل: '+({lfCls:'الصف',lfP:'رقم الحصة',lfSub:'المادة',lfTitle:'عنوان الدرس',lfText:'ما تم شرحه'})[miss]); el.focus(); el.scrollIntoView({block:'center'}); return; }
+  if(!f.owner && !f.id && lesMine().some(function(x){ return x.date===f.date && x.cls===f.cls && String(x.p)===String(f.period); })){ status('err','نزّلت درس هذه الحصة من قبل؛ عدّله من القائمة.'); return; }
+  var id=f.id||('L'+Date.now().toString(36)+Math.floor(Math.random()*1e9).toString(36));
+  var p={id:id,date:f.date,cls:f.cls,subject:f.subject,period:String(f.period),title:String(f.title).trim(),text:String(f.text).trim(),hw:String(f.hw).trim()};
+  if(f.owner) p.owner=f.owner;
+  var a=lobGet().filter(function(x){ return !(x.who===S.teacher && x.id===id && x.op==='save'); });
+  a.push({k:'k'+Date.now()+Math.random(),who:S.teacher,op:'save',id:id,p:p});
+  lobSet(a); setDirty(false);
+  if(f.owner){   // a supervisor's correction: wait for the server, then show the day again
+    load(true); var t0=Date.now(), iv=setInterval(function(){ var left=lobGet().filter(function(x){return x.id===id;})[0];
+      if(!left || left.err || Date.now()-t0>45000){ clearInterval(iv); load(false); if(left&&left.err) alert('لم يُقبل: '+left.err); lesBack(); } },300);
+    lobFlush(true); return; }
+  lesBack(); toast('حُفظ الدرس'); lobFlush(true);
+}
+
+// ---- supervisor: one day — what was posted, what is missing, hide / show
+function openLesSup(date){
+  call('webMissingToday',[S.teacher,S.pin,date||''],function(d){ S.ls=d; renderLesSup(); });
+}
+function renderLesSup(){
+  S.view='lessup'; who(); document.getElementById('savebar').style.display='none';
+  var d=S.ls, isToday=d.date===d.today, posted=d.required-d.missing.length-d.later;
+  var h='<div class="card"><h2>متابعة الدروس<span class="grow"></span><button class="btn ghost sm" id="lsBack">دروسي</button></h2>'+
+    '<div class="mrow" style="margin-bottom:6px"><button class="btn ghost sm" id="lsPrev">‹ اليوم السابق</button><input type="date" id="lsDate" value="'+esc(d.date)+'" max="'+esc(d.today)+'" style="flex:1"><button class="btn ghost sm" id="lsNext"'+(isToday?' disabled':'')+'>التالي ›</button></div>'+
+    '<div class="mstat"><b>'+esc(lLabel(d.date))+(isToday?' (اليوم)':'')+'</b><br>';
+  if(!d.school) h+=(d.holiday?'عطلة رسمية':'ليس يوم دوام في جدول الحصص')+' — لا حصص مطلوبة.';
+  else h+='الحصص المطلوبة: '+d.required+' · نُزّل منها: <span class="okc">'+posted+'</span> · ناقص: <span class="'+(d.missing.length?'warn':'okc')+'">'+d.missing.length+'</span>'+(d.later?' · لم ينتهِ وقتها بعد: '+d.later:'');
+  h+='</div></div>';
+  if(d.school){
+    h+='<div class="card"><h2>الحصص الناقصة<span class="grow"></span><span class="badge">'+d.missing.length+'</span></h2>';
+    if(d.missing.length){
+      if(d.none.length) h+='<div class="banner" style="margin-top:0;margin-bottom:10px"><b>لم ينزّلوا أي درس '+(isToday?'اليوم':'في هذا اليوم')+':</b> '+esc(d.none.join('، '))+'</div>';
+      h+='<div class="list">'; d.missing.forEach(function(x){ h+='<div class="row"><div class="nm"><b>الحصة '+x.p+' · '+esc(x.cls)+' · '+esc(x.subject)+'</b><small>'+esc(x.teachers.join('، '))+'</small></div></div>'; }); h+='</div>';
+    } else h+='<div class="hint" style="margin-top:0">'+(d.later?'لا ناقص حتى الآن.':'كل الحصص المطلوبة نُزّلت دروسها.')+'</div>';
+    if(isToday) h+='<div class="hint">تُحسب الحصة ناقصة بعد انتهاء وقتها. المطلوب يُؤخذ من ورقة «جدول الحصص».</div>';
+    h+='</div>';
+  }
+  h+='<div class="card"><h2>الدروس المنزّلة<span class="grow"></span><span class="badge">'+d.lessons.length+'</span></h2>';
+  if(d.lessons.length){ h+='<div class="list">'; d.lessons.slice().sort(function(a,b){return a.p-b.p;}).forEach(function(x){
+      h+=lesRow(x,true)+'<div class="row ltext'+(x.hidden?' lhid':'')+'"><div class="nm"><small>'+lNl(x.text)+(x.hw?'<br><b style="display:inline;font-size:12px">الواجب:</b> '+lNl(x.hw):'')+'</small></div></div>'; });
+    h+='</div><div class="hint">«إخفاء» يزيل الدرس من صفحة الأهل فورًا ويبقيه في الملف، ويُسجَّل من أخفاه ومتى. «إظهار» يعيده.</div>'; }
+  else h+='<div class="hint" style="margin-top:0">لم يُنزَّل أي درس في هذا اليوم.</div>';
+  h+='</div>';
+  app.innerHTML=h;
+  document.getElementById('lsBack').onclick=function(){ openLessons(); };
+  document.getElementById('lsPrev').onclick=function(){ openLesSup(lAdd(d.date,-1)); };
+  document.getElementById('lsNext').onclick=function(){ openLesSup(lAdd(d.date,1)); };
+  document.getElementById('lsDate').onchange=function(){ if(this.value) openLesSup(this.value); };
+  app.querySelectorAll('[data-lhide]').forEach(function(b){ b.onclick=function(){
+    var hide=b.getAttribute('data-h')==='1'; if(hide && !confirm('إخفاء هذا الدرس عن الأهل؟')) return;
+    call('webLessonHide',[S.teacher,S.pin,b.getAttribute('data-lhide'),hide],function(){ toast(hide?'أُخفي الدرس عن الأهل':'ظهر الدرس للأهل'); keepSup(); }); }; });
+  app.querySelectorAll('[data-ledit]').forEach(function(b){ b.onclick=function(){ var id=b.getAttribute('data-ledit'), x=d.lessons.filter(function(y){return y.id===id;})[0]; if(!x) return;
+    function go(){ lesForm({id:x.id,date:x.date,cls:x.cls,subject:x.subject,period:x.p,title:x.title,text:x.text,hw:x.hw,owner:x.teacher,back:'sup'}); }
+    if(S.li) go(); else call('webLessonsInit',[S.teacher,S.pin],function(I){ S.li=I; go(); }); }; });
+  function keepSup(){ var y=window.scrollY; call('webMissingToday',[S.teacher,S.pin,d.date],function(n){ S.ls=n; renderLesSup(); window.scrollTo(0,y); }); }
+}
+function lesHomeCard(){
+  var l=S.home&&S.home.les; if(!l||!l.on) return '';
+  var w=lobMine().length;
+  return '<div class="card"><h2>دروس اليوم'+(l.due?'<span class="grow"></span><span class="badge">بقي لك اليوم '+l.due+'</span>':'')+'</h2>'+
+    '<div class="hint" style="margin-top:0">نزّل لكل حصة عنوان الدرس وما شُرح فيه؛ يراه أهل الصف في التطبيق.'+(w?' <span class="warn">('+w+' بانتظار الإرسال)</span>':'')+'</div>'+
+    '<div class="roles" style="margin-top:10px"><button class="btn" id="lesGo">دروس اليوم</button>'+(l.sup?'<button class="btn ghost" id="lesSupGo">متابعة الدروس (المشرف)</button>':'')+'</div></div>';
+}
+function bindLesHome(){
+  var g=document.getElementById('lesGo'); if(g) g.onclick=openLessons;
+  var s=document.getElementById('lesSupGo'); if(s) s.onclick=function(){ openLesSup(''); };
+}
+
+// ---- parents: no login. ?class=<id> (or «أنا ولي أمر» on the login screen) → the class's lessons; the phone remembers the class
+function parentId(){ try{ var m=/[?&]class=([A-Za-z0-9]{1,12})/.exec(location.search||''); return m? m[1].toLowerCase() : ''; }catch(e){ return ''; } }
+var TTL_SUB='';
+function parentTop(){
+  document.getElementById('savebar').style.display='none';
+  var ts=document.getElementById('ttlSub'); if(ts){ if(!TTL_SUB) TTL_SUB=ts.textContent; ts.textContent='دروس اليوم — لأولياء الأمور'; }
+  document.getElementById('who').innerHTML='<a id="pSwitch">تغيير الصف</a><br><a id="pStaff">دخول المعلمين</a>';
+  document.getElementById('pSwitch').onclick=function(){ renderParentPick(); };
+  document.getElementById('pStaff').onclick=function(){ store('albaraem_parent',null); S.parent=''; var ts=document.getElementById('ttlSub'); if(ts && TTL_SUB) ts.textContent=TTL_SUB; try{ history.replaceState(null,'',location.pathname); }catch(e){} S.boot=null; start(); };
+}
+function renderParentPick(){
+  S.view='ppick'; S.parent=S.parent||'pick'; parentTop();
+  function draw(list){
+    var h='<div class="card"><h2>دروس اليوم — اختر صف ابنك/ابنتك</h2><div class="list">';
+    list.forEach(function(p){ h+='<div class="row"><div class="nm"><b>'+esc(p.label)+'</b></div><button class="btn sm" data-pc="'+esc(p.id)+'">فتح</button></div>'; });
+    h+='</div><div class="hint">يتذكّر هذا الهاتف الصف الذي تختاره، ويفتحه مباشرة في المرة القادمة.</div></div>';
+    app.innerHTML=h;
+    app.querySelectorAll('[data-pc]').forEach(function(b){ b.onclick=function(){ openParent(b.getAttribute('data-pc')); }; });
+  }
+  if(S.boot && S.boot.parents){ draw(S.boot.parents); return; }
+  call('webBootstrap',[],function(b){ S.boot=b; jput('albaraem_boot',b);
+    if(b.parents) draw(b.parents); else app.innerHTML='<div class="card"><h2>دروس اليوم</h2><div class="hint" style="margin-top:0">هذه الخدمة لم تُفعَّل بعد. حاول لاحقًا.</div></div>'; },
+    function(m){ app.innerHTML='<div class="card"><h2>تعذّر الاتصال</h2><div class="hint" style="margin-top:0">'+esc(m||'تأكد من اتصال الإنترنت ثم أعد المحاولة.')+'</div><button class="btn block" onclick="location.reload()">إعادة المحاولة</button></div>'; });
+}
+function openParent(id){
+  S.parent=id; S.view='parent'; store('albaraem_parent',id); parentTop();
+  var c=jget('albaraem_pl_'+id);
+  if(c && c.d){ S.pl=c; renderParent(); } else { S.pl=null; app.innerHTML=''; }
+  parentFetch(!S.pl);
+}
+function parentFetch(loud){
+  var id=S.parent; if(parentFetch.on) return; parentFetch.on=true;
+  call('webParentLessons',[id],function(d){ parentFetch.on=false; if(S.parent!==id) return; S.pl={d:d,at:Date.now()}; jput('albaraem_pl_'+id,S.pl); S.plErr=''; if(S.view==='parent') renderParent(); },
+    function(m){ parentFetch.on=false; if(S.parent!==id) return;
+      if(/رابط الصف غير صحيح/.test(m||'')){ store('albaraem_parent',null); store('albaraem_pl_'+id,null); S.pl=null; S.plErr=m; renderParent(); return; }
+      S.plErr=/طلب غير معروف/.test(m||'')?'هذه الخدمة لم تُفعَّل بعد. حاول لاحقًا.':(m||'تعذّر الاتصال.'); if(S.view==='parent') renderParent(); }, !loud);
+}
+function plCard(x){
+  return '<div class="lcard"><div class="ph"><span class="badge">الحصة '+esc(x.p)+'</span> '+esc(x.subject)+'</div><h3>'+esc(x.title)+'</h3><p>'+lNl(x.text)+'</p>'+
+    (x.hw?'<div class="hw"><b>الواجب</b>'+lNl(x.hw)+'</div>':'')+'</div>';
+}
+function renderParent(){
+  S.view='parent'; var c=S.pl, h='';
+  if(!c){ app.innerHTML='<div class="card"><h2>دروس اليوم</h2><div class="hint" style="margin-top:0">'+esc(S.plErr||'جارٍ التحميل…')+'</div>'+
+    (S.plErr?'<button class="btn block" id="pRetry">إعادة المحاولة</button><button class="btn ghost block" id="pPick">اختيار الصف</button>':'')+'</div>';
+    var r=document.getElementById('pRetry'); if(r) r.onclick=function(){ S.plErr=''; renderParent(); parentFetch(true); };
+    var k=document.getElementById('pPick'); if(k) k.onclick=renderParentPick; return; }
+  var d=c.d, t=d.days[0]||{lessons:[]}, stale=d.today!==localIso();
+  h+='<div class="card phead"><h2>'+esc(d.label)+'<span class="grow"></span><button class="btn ghost sm" id="pRef">تحديث</button></h2>'+
+     '<div class="hint" style="margin-top:0">ما أخذه الصف في كل حصة، كما كتبه المعلمون.'+(S.plErr?' <span class="warn">تعذّر التحديث الآن؛ هذه آخر نسخة محفوظة.</span>':'')+'</div></div>';
+  h+='<div class="pday today">'+(stale?esc(lLabel(d.today)):'اليوم — '+esc(lLabel(d.today)))+'</div>';
+  if(t.date===d.today && t.lessons.length) h+=t.lessons.map(plCard).join('');
+  else h+='<div class="card"><div class="hint" style="margin-top:0">'+(d.school?'لم تُنزَّل دروس اليوم بعد. تُضاف الدروس خلال اليوم الدراسي وبعده.':'لا دوام اليوم.')+'</div></div>';
+  var old=d.days.filter(function(x){ return x.date!==d.today && x.lessons.length; });
+  if(old.length){ h+='<div class="pday sep">الأيام السابقة</div>'; old.forEach(function(x){ h+='<div class="pday">'+esc(lLabel(x.date))+'</div>'+x.lessons.map(plCard).join(''); }); }
+  h+=installCard();
+  app.innerHTML=h;
+  document.getElementById('pRef').onclick=function(){ parentFetch(true); };
+  var di=document.getElementById('doInstall'); if(di) di.onclick=function(){ if(!deferredInstall) return; deferredInstall.prompt(); deferredInstall.userChoice.then(function(){ deferredInstall=null; renderParent(); }); };
+  var hi=document.getElementById('hideInstall'); if(hi) hi.onclick=function(){ store('albaraem_install_hide','1'); renderParent(); };
+}
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState!=='visible') return;
+  if(S.view==='parent' && S.pl && Date.now()-(S.pl.at||0)>60000) parentFetch(false);
+  if(S.view==='lessons' && S.pin) lesRefresh();
+});
+
+document.getElementById('saveBtn').onclick=function(){ if(busy>0) return; if(S.view==='lesson') saveLesson(); else if(S.view==='visit') saveVisit(); else if(S.view==='tasks') saveTasks(); else if(S.view==='tg') saveTg(); else if(S.view==='fam') saveFam(); else if(S.view==='meet') saveMeet(); else saveClass(); };
 start();
 </script>
 <script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js');});}</script>
