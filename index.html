@@ -1578,7 +1578,7 @@ function renderParent(){
   if(S.plErr) h+='<div class="banner">تعذّر التحديث الآن؛ هذه آخر نسخة محفوظة على الهاتف.</div>';
   h+='<div class="pday">اختر المادة</div><div class="sgrid">';
   subs.slice().sort(function(x,y){ return (y.today?1:0)-(x.today?1:0) || (y.list.length?1:0)-(x.list.length?1:0) || x.i-y.i; }).forEach(function(s){
-    var st = s.today ? '<em class="on">درس اليوم'+(s.hw?' · واجب':'')+'</em>' : s.list.length ? '<em>آخر درس: '+esc(lLabel(s.list[0].date))+'</em>' : '<em class="no">لا دروس هذا الأسبوع</em>';
+    var st = s.today ? '<em class="on">درس اليوم'+(s.hw?' · واجب':'')+'</em>' : s.list.length ? '<em>آخر درس: '+esc(lLabel(s.list[0].date))+'</em>' : '<em class="no">لا دروس بعد</em>';
     h+='<button class="stile c'+(s.i%8)+(s.list.length?'':' empty')+'" data-ps="'+esc(s.name)+'"><span class="mono">'+esc(plMono(s.name))+'</span><b>'+esc(s.name)+'</b>'+st+'</button>'; });
   h+='</div><div class="hint" style="text-align:center">اضغط على المادة لترى درس اليوم ودروس الأيام السابقة.</div>'+installCard();
   app.innerHTML=h; window.scrollTo(0,S.pY||0); S.pY=0;
@@ -1599,7 +1599,7 @@ function renderParentSubject(keepScroll){
   if(t.length) h+=t.sort(function(x,y){return x.p-y.p;}).map(function(x){ return plLesson(x,true); }).join('');
   else h+='<div class="lcard none">لا درس في هذه المادة اليوم.</div>';
   if(old.length){ h+='<div class="pday sep">الأيام السابقة</div>'+old.map(function(x){ return plLesson(x,false); }).join(''); }
-  else h+='<div class="hint" style="text-align:center;margin-top:16px">لا دروس سابقة في آخر '+(d.keep||7)+' أيام.</div>';
+  else h+='<div class="hint" style="text-align:center;margin-top:16px">لا دروس سابقة في آخر '+(d.keep||7)+' يومًا.</div>';
   app.innerHTML=h; window.scrollTo(0,keepScroll?y:0);
   document.getElementById('pBack').onclick=function(){ renderParent(); };
 }
