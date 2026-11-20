@@ -157,6 +157,23 @@ footer.save .st.err{color:var(--warn);font-weight:600}
 .lhb{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
 .lhb button{flex:1;border:0;border-radius:12px;padding:12px;background:#fff;color:var(--brand);font-weight:700;cursor:pointer}
 .lhb button.g{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.6)}
+.tkbar{display:flex;gap:8px;margin-top:14px;align-items:center}
+.tkbar input{flex:1;margin:0}
+.tkc{margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.tkc.full{border-color:#b9d8c5}
+.tkh{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;padding:13px 14px;cursor:pointer;text-align:start;color:var(--ink)}
+.tkh b{flex:1;min-width:0;font-size:15.5px}
+.tkh span{font-size:12.5px;font-weight:600;color:var(--muted);background:var(--soft);border-radius:999px;padding:2px 10px;direction:ltr}
+.tkc.full .tkh span{background:var(--ok);color:#fff}
+.tkh i{font-style:normal;color:var(--muted);font-size:13px}
+.tkb{padding:0 14px 14px}
+.tkg{font-size:12.5px;font-weight:700;color:var(--brand2);margin:10px 0 6px}
+.tki{font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:6px}
+.tkr{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px dashed var(--line)}
+.tkr > span{flex:1;min-width:0;font-size:14px}
+.tkr > span u{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--cv);margin-inline-end:7px}
+.tkr .roles{flex-shrink:0;flex-wrap:nowrap}
+.tkr .tri{min-width:58px}
 .ltop{padding:22px 4px 0}
 .ltop b{display:block;font-family:'Aref Ruqaa',serif;font-size:31px;line-height:1.3;color:var(--brand)}
 .ltop span{display:block;color:var(--muted);font-size:14px}
@@ -614,42 +631,77 @@ function renderAttLog(dr){
 
 // ---------------------------------------------------------------- role pages: tasks (أ. جعفر), قرة أعين (أ. هناء), Telegram (أ. نور عربيات)
 function rolesCard(){
-  var a=S.home&&S.home.adm; if(!a||!(a.tasks||a.quran||a.tg||a.meet)) return '';
+  var a=S.home&&S.home.adm; if(!a||!(a.tasks||a.quran||a.tg||a.meet||a.prep)) return '';
   var h='<div class="card"><h2>المتابعة الإدارية</h2><div class="roles">';
   if(a.tasks) h+='<button class="btn" data-role="tasks">المهام الإدارية — '+esc(S.month)+'</button>';
   if(a.quran) h+='<button class="btn" data-role="quran">قرة أعين — '+esc(S.month)+'</button>';
+  if(a.prep) h+='<button class="btn" data-role="prep">تحضير المعلمين — '+esc(S.month)+'</button>';
   if(a.tg) h+='<button class="btn" data-role="tg">تنزيلات التيليجرام</button>';
   if(a.meet) h+='<button class="btn" data-role="meet">اجتماعات الأهالي</button>';
   return h+'</div></div>';
 }
 function bindRoles(){ app.querySelectorAll('[data-role]').forEach(function(b){ b.onclick=function(){ var k=b.getAttribute('data-role'); if(k==='tg') openTg(''); else if(k==='meet') openMeets(); else openTasks(k); }; }); }
 function openTasks(kind){
-  call('webTasksLoad',[S.teacher,S.pin,kind,S.month],function(d){ S.tk=d; S.tk.cur=clone(d.values); S.view='tasks'; setDirty(false); renderTasks(); });
+  call('webTasksLoad',[S.teacher,S.pin,kind,S.month],function(d){ S.tk=d; S.tk.cur=clone(d.values); S.tk.open={}; S.tk.q=''; S.view='tasks'; setDirty(false); renderTasks(); });
 }
 function tkGet(t,k){ var o=S.tk.cur[t]; return o&&o[k]?o[k]:''; }
+/** A teacher's buttons: his own (from 11/2026, sheet «أزرار المعلمين»), or the same old list for everybody. */
+function tkItems(t){ var d=S.tk; return d.per ? (d.per[t]||[]) : d.items; }
+function tkDone(t){ var n=0; tkItems(t).forEach(function(it){ if(tkGet(t,it.key)) n++; }); return n; }
+function tkTri(t,ti,it,j,label){ var v=tkGet(t,it.key);
+  return '<button class="tri'+(v==='نعم'?' yes':v==='لا'?' no':'')+'" data-tt="'+ti+'" data-tj="'+j+'">'+esc(label)+(v==='نعم'?' ✓':v==='لا'?' ✗':'')+(it.range?'<small>'+esc(it.range)+'</small>':'')+'</button>'; }
 function renderTasks(){
-  who(); var d=S.tk, quran=d.kind==='quran';
+  who(); var d=S.tk, quran=d.kind==='quran', prep=d.kind==='prep', title=quran?'قرة أعين':prep?'تحضير المعلمين':'المهام الإدارية';
   document.getElementById('savebar').style.display='block'; document.getElementById('saveBtn').style.display=''; document.getElementById('saveBtn').textContent='حفظ';
-  var h='<div class="card"><h2>'+(quran?'قرة أعين':'المهام الإدارية')+' — '+esc(d.month)+'<span class="grow"></span><button class="fill" id="back">رجوع</button></h2>'+
-    '<div class="hint" style="margin-top:0">اضغط الخانة: مرة = ✓ '+(quran?'شاهد':'تم')+'، مرتين = ✗ '+(quran?'لم يشاهد':'لم يتم')+'، ثلاثًا = فارغ. كل ✗ تُحسب مخالفة في الراتب.</div></div><div class="list" style="margin-top:14px">';
+  var full=0; d.teachers.forEach(function(t){ var n=tkItems(t).length; if(n && tkDone(t)===n) full++; });
+  var fold=!!d.per && d.kind==='tasks';                     // long cards: one teacher open at a time
+  var h='<div class="ltop"><b>'+title+'</b><span>'+esc(d.month)+' · اكتمل '+full+' من '+d.teachers.length+'</span></div>'+
+    '<div class="tkbar"><input type="text" id="tkQ" placeholder="بحث باسم المعلم/ة" value="'+esc(d.q||'')+'"><button class="btn ghost sm" id="back">رجوع</button></div>'+
+    '<div class="hint" style="margin-top:8px">'+(prep?'لكل معلم/ة زرّان في الشهر (التحضير يُرفع كل أسبوعين): اختر «تم» أو «لم يتم» أو «لم يكن مطلوبًا». اضغط الاختيار مرة ثانية لمسحه.'
+      :'اضغط الخانة: مرة = ✓ '+(quran?'شاهد':'تم')+'، مرتين = ✗ '+(quran?'لم يشاهد':'لم يتم')+'، ثلاثًا = فارغ.')+
+      (d.per?' يظهر لكل معلم/ة ما هو مطلوب منه فقط.':'')+'</div>';
+  if(!d.teachers.length) h+='<div class="lnone">لا أحد مطلوب منه شيء في هذه الصفحة لهذا الشهر.</div>';
+  var q=String(d.q||'').trim();
   d.teachers.forEach(function(t,i){
-    h+='<div class="row"><div class="nm" style="flex-basis:100%"><b>'+esc(t)+'</b></div><div class="roles">';
-    d.items.forEach(function(it,j){ var v=tkGet(t,it.key);
-      h+='<button class="tri'+(v==='نعم'?' yes':v==='لا'?' no':'')+'" data-tt="'+i+'" data-tj="'+j+'">'+esc(quran?it.label:it.label.replace('الاجتماع ','').replace('المنهاج المنجز','المنهاج'))+(v==='نعم'?' ✓':v==='لا'?' ✗':'')+(it.range?'<small>'+esc(it.range)+'</small>':'')+'</button>'; });
-    h+='</div></div>';
+    if(q && t.indexOf(q)<0) return;
+    var items=tkItems(t), n=items.length, dn=tkDone(t), open=!fold || !!d.open[t] || !!q;
+    h+='<div class="tkc'+(dn===n?' full':'')+(open?' open':'')+'"><button class="tkh" data-tko="'+i+'"><b>'+esc(t)+'</b><span>'+dn+' / '+n+'</span>'+(fold?'<i>'+(open?'▴':'▾')+'</i>':'')+'</button>';
+    if(open){ h+='<div class="tkb">';
+      if(prep){
+        if(items[0]&&items[0].info) h+='<div class="tki">المواد: '+esc(items[0].info)+'</div>';
+        items.forEach(function(it,j){ var v=tkGet(t,it.key);
+          h+='<div class="tkr"><span>'+esc(it.label)+'</span><div class="opts">'+d.states.map(function(s,k){ return '<button class="s'+(k===0?0:k===1?2:3)+(v===s?' on':'')+'" data-tt="'+i+'" data-tj="'+j+'" data-tv="'+esc(s)+'">'+esc(s)+'</button>'; }).join('')+'</div></div>'; });
+      } else {
+        var flat=items.filter(function(it){ return !it.sub; }), g='';
+        if(flat.length){ if(flat[0].group) h+='<div class="tkg">'+esc(flat[0].group)+'</div>'; h+='<div class="roles">';
+          items.forEach(function(it,j){ if(it.sub) return; h+=tkTri(t,i,it,j, d.per||quran ? it.label : it.label.replace('الاجتماع ','').replace('المنهاج المنجز','المنهاج')); });
+          h+='</div>'; }
+        var last='';
+        items.forEach(function(it,j){ if(!it.sub) return;
+          if(it.group!==g){ g=it.group; h+='<div class="tkg">'+esc(g)+'</div>'; }
+          if(it.sub!==last){ if(last) h+='</div></div>'; last=it.sub; h+='<div class="tkr"><span><u class="c'+lesColor(it.sub)+'"></u>'+esc(it.sub)+'</span><div class="roles">'; }
+          h+=tkTri(t,i,it,j,it.label); });
+        if(last) h+='</div></div>';
+      }
+      h+='</div>'; }
+    h+='</div>';
   });
-  app.innerHTML=h+'</div>';
+  app.innerHTML=h;
   document.getElementById('back').onclick=function(){ leave(goHome); };
-  app.querySelectorAll('[data-tt]').forEach(function(b){ b.onclick=function(){
-    var t=d.teachers[+b.getAttribute('data-tt')], k=d.items[+b.getAttribute('data-tj')].key, v=tkGet(t,k);
-    if(!d.cur[t]) d.cur[t]={}; d.cur[t][k]= v===''?'نعم':v==='نعم'?'لا':''; setDirty(true); keep(renderTasks);
+  var qi=document.getElementById('tkQ'); qi.oninput=function(){ d.q=qi.value; var p=qi.selectionStart; renderTasks(); var e=document.getElementById('tkQ'); e.focus(); try{ e.setSelectionRange(p,p); }catch(x){} };
+  app.querySelectorAll('[data-tko]').forEach(function(b){ b.onclick=function(){ if(!fold) return; var t=d.teachers[+b.getAttribute('data-tko')]; var was=!!d.open[t]; d.open={}; if(!was) d.open[t]=true; keep(renderTasks); }; });
+  app.querySelectorAll('[data-tj]').forEach(function(b){ b.onclick=function(){
+    var t=d.teachers[+b.getAttribute('data-tt')], k=tkItems(t)[+b.getAttribute('data-tj')].key, v=tkGet(t,k), pick=b.getAttribute('data-tv');
+    if(!d.cur[t]) d.cur[t]={};
+    d.cur[t][k]= pick!==null ? (v===pick?'':pick) : (v===''?'نعم':v==='نعم'?'لا':'');
+    setDirty(true); keep(renderTasks);
   }; });
 }
 function saveTasks(){
   var d=S.tk, out={}, n=0;
-  d.teachers.forEach(function(t){ d.items.forEach(function(it){ var a=tkGet(t,it.key), b=(d.values[t]||{})[it.key]||''; if(a!==b){ (out[t]=out[t]||{})[it.key]=a; n++; } }); });
+  d.teachers.forEach(function(t){ tkItems(t).forEach(function(it){ var a=tkGet(t,it.key), b=(d.values[t]||{})[it.key]||''; if(a!==b){ (out[t]=out[t]||{})[it.key]=a; n++; } }); });
   if(!n){ setDirty(false); return; }
-  call('webTasksSave',[S.teacher,S.pin,d.kind,d.month,out],function(r){ d.values=clone(d.cur); S.dirty=false; document.getElementById('saveBtn').disabled=true; status('ok','تم الحفظ ✓ ('+r.saved+')'); });
+  call('webTasksSave',[S.teacher,S.pin,d.kind,d.month,out],function(r){ d.values=clone(d.cur); S.dirty=false; document.getElementById('saveBtn').disabled=true; status('ok','تم الحفظ ✓ ('+r.saved+')'); keep(renderTasks); });
 }
 function openTg(date){ call('webTgLoad',[S.teacher,S.pin,date],function(d){ S.tg=d; S.tg.cur=clone(d.values); S.view='tg'; setDirty(false); renderTg(); }); }
 function renderTg(){
@@ -657,7 +709,7 @@ function renderTg(){
   document.getElementById('savebar').style.display='block'; document.getElementById('saveBtn').style.display=''; document.getElementById('saveBtn').textContent='حفظ';
   var h='<div class="card"><h2>تنزيلات التيليجرام<span class="grow"></span><button class="fill" id="back">رجوع</button></h2>'+
     '<div class="mrow"><span>اليوم</span><input type="date" id="tgDate" value="'+esc(d.date)+'" max="'+esc(d.today)+'" style="width:auto;flex:1;max-width:200px;padding:8px 10px"><span>'+esc(d.day)+'</span></div>'+
-    '<div class="hint" style="margin-top:0">لكل معلم/ة: هل نزّل للأهالي في هذا اليوم؟ «لم ينزّل» تُحسب في الخصم (كل 3 مرات = خصم).</div>'+
+    '<div class="hint" style="margin-top:0">لكل معلم/ة: هل نزّل للأهالي في هذا اليوم؟ </div>'+
     '<div class="bar"><span class="grow"></span><button class="fill" id="tgFill">عبّئ الفارغ: «نزّل» لمن عليه دوام، «لا يوجد» للباقي</button></div></div><div class="list" style="margin-top:6px">';
   var short={'نزّل':'نزّل','نزّل متأخرًا':'متأخر','لم ينزّل':'لم ينزّل','لا يوجد تنزيل':'لا يوجد'};
   d.teachers.slice().sort(function(a,b){ return (b.scheduled?1:0)-(a.scheduled?1:0); }).forEach(function(t){
