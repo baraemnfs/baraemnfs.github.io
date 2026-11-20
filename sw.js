@@ -1,5 +1,5 @@
 // Service worker for «البراعم». VERSION is replaced at build time, so every new build replaces the cached app.
-const VERSION = '3d6eca00b9';
+const VERSION = 'a118aba221';
 const CACHE = 'albaraem-' + VERSION;
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png',
   './icons/maskable-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'];

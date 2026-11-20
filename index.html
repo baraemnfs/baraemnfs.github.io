@@ -354,7 +354,7 @@ function call(fn,args,ok,onFail,quiet){
   }
   if(API_URL.indexOf('https://')!==0 || !window.fetch){ viaScriptRun(); return; }
   var ctl=window.AbortController? new AbortController() : null, timer=setTimeout(function(){ if(ctl) ctl.abort(); }, 60000);
-  fetch(API_URL,{method:'POST',credentials:'omit',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn:fn,args:args}),signal:ctl?ctl.signal:undefined})
+  fetch(API_URL,{method:'POST',credentials:'omit',redirect:'follow',keepalive:(fn==='webPunch'),headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn:fn,args:args}),signal:ctl?ctl.signal:undefined})
     .then(function(r){ if(!r.ok) throw new Error('http'); return r.json(); })
     .then(function(res){
       clearTimeout(timer);
@@ -454,12 +454,14 @@ function who(){
 // ---------------------------------------------------------------- home: my evaluations + visits
 function gotHome(h){
   if(h && h.adm && h.adm.err){ var prev=S.home||S.homes[hkey()]||(jget('albaraem_home')||{}).h; h.adm=(prev && prev.adm && !prev.adm.err)? prev.adm : {}; }
+  if(h && h.att){ if(!punch.on){ S.att=h.att; S.attAt=Date.now(); } delete h.att; }   // not kept with the cached home: it is today's only
   S.home=h; S.sup=!!h.supervisor; S.homes[hkey()]=h; jput('albaraem_home',{key:hkey(),h:h}); }
 function homeFetch(loud,onFail,force){
   var k=hkey(), v0=S.view;
   call('webHome',[S.teacher,S.pin,S.month],function(h){
-    var changed=JSON.stringify(h)!==JSON.stringify(S.homes[k]);
+    var att0=JSON.stringify(S.att), hadAtt=!!(h&&h.att), old=JSON.stringify(S.homes[k]);
     gotHome(h);
+    var changed=JSON.stringify(h)!==old || (hadAtt && JSON.stringify(S.att)!==att0);
     // redraw only while the teacher is looking at the home page (or asked for it) — never over a class or a visit opened meanwhile
     if(S.pin && hkey()===k && (S.view==='login' || (force && S.view===v0) || (S.view==='home' && changed))) renderHome();
   }, onFail, !loud);
@@ -549,7 +551,8 @@ function attCard(){
   else if(t.type==='عادي') h+='<div class="hint" style="margin-top:0">دوامك المعتمد اليوم: <b>'+esc(t.expFrom)+' – '+esc(t.expTo)+'</b></div>';
   else h+='<div class="hint" style="margin-top:0">اليوم ليس من أيام دوامك المعتمدة؛ يُسجَّل <b>دوامًا إضافيًا</b>.</div>';
   h+='<div class="times"><div><small>الوصول</small><b>'+esc(r.inn||'—')+'</b></div><div><small>المغادرة</small><b>'+esc(r.out||'—')+'</b></div></div>';
-  h+='<div class="big"><button class="btn" id="pIn"'+(r.inn?' disabled':'')+'>وصلت</button><button class="btn ghost" id="pOut"'+(r.inn?'':' disabled')+'>'+(r.out?'غادرت (تحديث)':'غادرت')+'</button></div>';
+  h+='<div class="big"><button class="btn" id="pIn"'+(r.inn||r.wait?' disabled':'')+'>وصلت</button><button class="btn ghost" id="pOut"'+(r.inn&&!r.wait?'':' disabled')+'>'+(r.out?'غادرت (تحديث)':'غادرت')+'</button></div>';
+  if(r.wait) h+='<div class="hint" style="margin-top:8px">⏳ جارٍ الحفظ… يمكنك متابعة عملك.</div>';
   var late = t.type==='عادي' && r.inn && mins(r.inn)>mins(t.expFrom), early = t.type==='عادي' && r.out && mins(r.out)<mins(t.expTo);
   if(late) h+='<label class="f"><span class="warn">تأخرت '+(mins(r.inn)-mins(t.expFrom))+' دقيقة</span> — سبب التأخير</label><textarea class="why" id="wLate" placeholder="اكتب السبب">'+esc(r.lateR||'')+'</textarea>';
   if(early) h+='<label class="f"><span class="warn">غادرت قبل موعدك بـ '+(mins(t.expTo)-mins(r.out))+' دقيقة</span> — سبب المغادرة المبكرة</label><textarea class="why" id="wEarly" placeholder="اكتب السبب">'+esc(r.earlyR||'')+'</textarea>';
@@ -568,7 +571,16 @@ function bindAtt(){
   };
   var l=document.getElementById('attLog'); if(l) l.onclick=function(e){ e.preventDefault(); S.view='attlog'; renderAttLog(); };
 }
-function punch(k){ if(punch.on) return; punch.on=true; call('webPunch',[S.teacher,S.pin,k],function(x){ punch.on=false; S.att=x; S.attAt=Date.now(); homeKeepWhy(); toast(k==='in'?'سُجّل وصولك ✓':'سُجّلت مغادرتك ✓'); },function(m){ punch.on=false; status('err',m||'حدث خطأ، حاول مرة أخرى'); }); }
+function punch(k){
+  if(punch.on || !S.att || !S.att.today) return; punch.on=true;
+  var t=S.att.today, old=t.rec? clone(t.rec) : null, d=new Date(), p=function(n){ return (n<10?'0':'')+n; }, now=p(d.getHours())+':'+p(d.getMinutes());
+  if(!t.rec) t.rec={inn:'',out:'',lateR:'',earlyR:'',tasks:''};
+  if(k==='in'){ if(!t.rec.inn) t.rec.inn=now; } else t.rec.out=now;
+  t.rec.wait=true;                                            // shown at once; the server's own time replaces it when the answer comes
+  if(S.view==='home') homeKeepWhy();
+  call('webPunch',[S.teacher,S.pin,k],function(x){ punch.on=false; S.att=x; S.attAt=Date.now(); if(S.view==='home') homeKeepWhy(); toast(k==='in'?'سُجّل وصولك ✓':'سُجّلت مغادرتك ✓'); },
+    function(m){ punch.on=false; if(S.att && S.att.today){ S.att.today.rec=old; } if(S.view==='home') homeKeepWhy(); status('err','لم يُسجَّل '+(k==='in'?'الوصول':'المغادرة')+': '+(m||'حاول مرة أخرى')); document.getElementById('savebar').style.display='block'; document.getElementById('saveBtn').style.display='none'; }, true);
+}
 function toast(m){ var st=document.getElementById('st'), bar=document.getElementById('savebar'); bar.style.display='block'; document.getElementById('saveBtn').style.display='none'; st.className='st ok'; st.textContent=m;
   clearTimeout(toast.t); toast.t=setTimeout(function(){ if(S.view==='home'){ bar.style.display='none'; } document.getElementById('saveBtn').style.display=''; },2500); }
 function renderAttLog(dr){
