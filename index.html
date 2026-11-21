@@ -137,6 +137,11 @@ footer.save .st.err{color:var(--warn);font-weight:600}
   .nbk.open{animation:nbopen var(--t3) var(--out)}
   @keyframes nbopen{from{opacity:0;transform:translateY(10px) scale(.985)}}
   .tkc.open .tkb{animation:unfold var(--t2) var(--out)}
+  /* the letter goes into the envelope only once the school has it */
+  .letter.fold{transition:transform var(--t3) var(--out),opacity var(--t3) var(--out);transform:translateY(10px) scale(.9);opacity:0}
+  .pmdone.sent .pmseal{animation:pop var(--t3) var(--spring) .1s backwards}
+  .pmdone.sent h2,.pmdone.sent .pmticket{animation:rise var(--t2) var(--out) .2s backwards}
+  .pmbdg{animation:pop var(--t3) var(--spring)}
   @keyframes unfold{from{opacity:0;transform:translateY(-4px)}}
 }
 .hint{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.7}
@@ -290,6 +295,50 @@ input[type=text]#lfTitle{margin-top:0}
 .phero .pnew{display:inline-block;margin-top:8px;background:#fde8e8;color:#b3261e;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:600}
 .pact{display:flex;gap:8px;margin-top:12px}
 .pact button{border:1px solid var(--line);background:#fff;color:var(--brand2);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer}
+.pact{flex-wrap:wrap}
+.pact button{min-height:40px}
+.pact button.pmgo{border-color:#e2cf9c;background:#fffaf0;color:#7a5600}
+/* «رسالة إلى المدرسة»: letter paper, gold seal — quieter than the notebooks */
+.pmic{display:inline-flex;width:40px;flex-shrink:0}.pmic svg{width:100%;height:auto;display:block}
+.pmcard{display:flex;align-items:center;gap:12px;width:100%;margin-top:22px;padding:14px 16px;border:1.5px dashed #d9c38c;border-radius:14px;background:#fffdf6;cursor:pointer;text-align:start;color:var(--ink)}
+.pmcard b{display:block;font-size:15px;color:#6b4f12}.pmcard small{display:block;color:var(--muted);font-size:13px;margin-top:2px}.pmcard i{margin-inline-start:auto;font-style:normal;font-size:22px;color:#b8862b}
+.pmwait{margin-top:12px;border:1px solid #e2cf9c;background:#fffaf0;color:#6b4f12;border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.7}
+.lnk{border:0;background:none;color:var(--brand2);text-decoration:underline;font-weight:600;cursor:pointer;padding:0 4px}
+.letter{margin-top:6px;border:1px solid #e6dcb8;border-radius:16px;background:#fffdf6;overflow:hidden;box-shadow:0 12px 26px -16px rgba(107,79,18,.45)}
+.lhead{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid #eee2c0;background:#fdf6e3}
+.lhead .pmic{width:48px}.lhead b{display:block;font-family:'Aref Ruqaa',serif;font-size:27px;line-height:1.25;color:var(--brand)}.lhead small{display:block;color:var(--muted);font-size:13px}
+.lbody{padding:4px 16px 18px}
+.lbody label.f{color:#4d5d52;font-weight:600;margin-top:16px}
+.pmch .chip{min-height:42px}
+.pmta{width:100%;min-height:130px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;resize:vertical;line-height:1.8}
+.pmta.sm{min-height:70px}
+.lbody input[type=tel]{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;text-align:right;letter-spacing:1px}
+.pmcount{font-size:12px;color:var(--muted);text-align:left}.pmcount.low{color:var(--warn)}
+.ferr{color:var(--warn);font-size:13px;margin-top:4px}.ferr:empty{display:none}
+.pmck{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:14px;line-height:1.6;cursor:pointer}.pmck input{width:20px;height:20px;margin:2px 0 0;flex-shrink:0;accent-color:var(--brand)}
+.pmsep{border-top:1px dashed #e6dcb8;margin:18px 0 2px}
+.pmnote{margin-top:16px;font-size:13px;color:var(--muted);line-height:1.7;border-inline-start:3px solid #e2cf9c;padding-inline-start:10px}
+.lbody input.pmhp{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;clip-path:inset(50%);overflow:hidden;border:0;padding:0}
+.pmdone{text-align:center;padding:30px 8px 0}
+.pmseal{width:92px;height:92px;margin:0 auto 14px;border-radius:50%;background:#eef5f0;display:flex;align-items:center;justify-content:center}.pmseal svg{width:56px}
+.pmdone.wait .pmseal{background:#fdf6e3}.pmclock{font-size:36px}
+.pmdone h2{font-family:'Aref Ruqaa',serif;font-size:27px;color:var(--brand);margin:0 0 6px;outline:0}
+.pmdone p{color:#4d5d52;line-height:1.8;margin:8px 0}.pmdone .pmsmall{font-size:13px;color:var(--muted)}
+.pmticket{display:inline-block;margin:10px auto 4px;border:1.5px dashed #b8862b;border-radius:12px;padding:8px 22px;background:#fffdf6}
+.pmticket small{display:block;font-size:12px;color:var(--muted)}.pmticket b{font-size:24px;color:#7a5600;letter-spacing:2px}
+.pmhome h2 .pmic{width:30px}
+.pmbdg{background:#c0392b;color:#fff;border-radius:999px;min-width:26px;height:26px;padding:0 8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;font-family:"IBM Plex Sans Arabic",Tahoma,sans-serif}
+.pmtabs .n{font-size:12px;opacity:.75}
+.pmfilt{display:flex;gap:8px;margin-top:10px}.pmfilt select{flex:1;padding:9px 10px}
+.pmlist{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.pmrow{display:block;width:100%;text-align:start;border:1px solid var(--line);border-inline-start:4px solid #e2cf9c;border-radius:12px;background:#fff;padding:12px;cursor:pointer;color:var(--ink)}
+.pmrow.cmp{border-inline-start-color:#c0392b}.pmrow.late{background:#fff8f6}
+.pmr1{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.pmr1 b{color:var(--brand)}.pmr1 span{font-size:13px;color:#6b4f12}.pmr1 em{margin-inline-start:auto;font-style:normal;font-size:12.5px;color:var(--muted)}
+.pmrow.late .pmr1 em{color:var(--warn);font-weight:600}
+.pmr2{font-size:13px;color:#4d5d52;margin-top:4px}.pmr3{font-size:14px;margin-top:6px;line-height:1.7}
+.pmr4{display:flex;gap:12px;font-size:12px;color:var(--muted);margin-top:8px}.pmr4 .none{color:#a0522d}
+.pmmsg .pmtext{font-size:16px;line-height:1.9}.pmwho{margin-top:12px;font-size:13.5px;color:#4d5d52}
+.pmcall{display:flex;gap:8px;margin-top:14px}.pmcall .btn{flex:1;text-align:center;text-decoration:none;display:inline-block}.pmcall .btn.ghost{flex:0 0 auto}
 .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px 12px;margin-top:20px}
 .stile{position:relative;display:block;min-height:180px;padding:0;border:0;cursor:pointer;background-color:var(--cv);border-radius:20px 8px 8px 20px;box-shadow:0 2px 0 var(--cd),0 10px 18px -10px rgba(23,48,31,.5);text-align:center}
 .stile:before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:14px;background-color:var(--cd);border-radius:0 8px 8px 0}
@@ -397,9 +446,9 @@ function call(fn,args,ok,onFail,quiet){
     });
 }
 /** May the page reload itself now for a new version? Only where nothing typed can be lost. */
-function appIdle(){ var a=document.activeElement, typing=a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName); return !S.dirty && !busy && !punch.on && !typing && ['home','login','welcome','ppick','parent'].indexOf(S.view)>=0; }
+function appIdle(){ var a=document.activeElement, typing=a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName); return !S.dirty && !busy && !punch.on && !typing && ['home','login','welcome','ppick','parent','pmdone'].indexOf(S.view)>=0; }
 function store(k,v){try{ if(v===undefined) return localStorage.getItem(k); if(v===null) localStorage.removeItem(k); else localStorage.setItem(k,v);}catch(e){return null;}}
-function forget(){ store('albaraem_pin',null); store('albaraem_home',null); S.pin=''; S.homes={}; S.classes={}; S.home=null; S.att=null; S.attAt=0; S.attBusy=false; S.vinit=null; S.v=null; S.tk=null; S.tg=null; S.mi=null; S.mt=null; S.li=null; S.lf=null; S.ls=null; S.dirty=false; }
+function forget(){ store('albaraem_pin',null); store('albaraem_home',null); S.pin=''; S.homes={}; S.classes={}; S.home=null; S.att=null; S.attAt=0; S.attBusy=false; S.vinit=null; S.v=null; S.tk=null; S.tg=null; S.mi=null; S.mt=null; S.li=null; S.lf=null; S.ls=null; S.pm=null; S.pmo=null; S.dirty=false; }
 function jget(k){ try{ return JSON.parse(store(k)||'null'); }catch(e){ return null; } }
 function jput(k,v){ try{ store(k,JSON.stringify(v)); }catch(e){} }
 function thisMonth(months,fallback){ var d=new Date(), m=(d.getMonth()+1)+'/'+d.getFullYear(); return months.indexOf(m)>=0 ? m : (fallback && months.indexOf(fallback)>=0 ? fallback : months[0]); }
@@ -470,7 +519,9 @@ function renderLogin(){
 var navOn=false;
 window.addEventListener('popstate',function(){
   navOn=false;
-  if(S.view==='psub'){ renderParent(); return; }
+  if(S.view==='psub'||S.view==='pmdone'){ renderParent(); return; }
+  if(S.view==='pmform'){ if(S.pmDirty && String(S.pmf.text||'').trim() && !confirm('لم تُرسل رسالتك بعد. هل تريد تركها؟')){ try{ history.pushState({albaraem:'psub'},''); }catch(e){} return; } S.pmDirty=false; renderParent(); return; }
+  if(S.view==='pmone'){ if(S.dirty && !confirm(LEAVE)){ navMark(); return; } setDirty(false); renderPmBox(); return; }
   if(S.view==='home'||S.view==='login'||S.view==='parent'||S.view==='ppick'||S.view==='welcome') return;
   if(S.dirty && !confirm(LEAVE)){ navMark(); return; }
   setDirty(false); goHome();
@@ -516,7 +567,7 @@ function goHome(){
 function renderHome(){
   S.view='home'; S.asSup=false; who(); setTimeout(prefetchClasses, 600); setTimeout(obFlush, 300);
   document.getElementById('savebar').style.display='none';
-  var h=S.home, done={}, html='<div class="greet"><b>أهلًا '+esc(S.teacher)+'</b><span>'+esc(lLabel(localIso()))+'</span></div>'+installCard()+attCard()+lesHomeCard()+rolesCard()+'<div class="card"><h2>تقييماتي الشهرية</h2>'+
+  var h=S.home, done={}, html='<div class="greet"><b>أهلًا '+esc(S.teacher)+'</b><span>'+esc(lLabel(localIso()))+'</span></div>'+installCard()+attCard()+pmHomeCard()+lesHomeCard()+rolesCard()+'<div class="card"><h2>تقييماتي الشهرية</h2>'+
     '<div class="mrow"><span>الشهر</span><select id="hMonth">'+S.boot.months.map(function(m){return '<option value="'+esc(m)+'"'+(m===S.month?' selected':'')+'>'+esc(m)+'</option>';}).join('')+'</select></div>';
   if(h.classes.length){
     html+='<div class="list">';
@@ -568,7 +619,7 @@ function renderHome(){
   var nf=document.getElementById('newF'); if(nf) nf.onclick=function(){ openFam(null); };
   var nv=document.getElementById('newV'); if(nv) nv.onclick=function(){ openVisit(''); };
   document.getElementById('hMonth').onchange=function(){ S.month=this.value; goHome(); };
-  bindInstall(); bindAtt(); bindRoles(); bindLesHome(); setTimeout(lobFlush, 400);
+  bindInstall(); bindAtt(); bindPmHome(); bindRoles(); bindLesHome(); setTimeout(lobFlush, 400);
   attMaybe();
 }
 
@@ -1752,6 +1803,7 @@ function renderWelcome(){
 }
 function parentId(){ try{ var m=/[?&]class=([A-Za-z0-9]{1,12})/.exec(location.search||''); return m? m[1].toLowerCase() : ''; }catch(e){ return ''; } }
 function parentExit(){
+  store('albaraem_pm_me',null);                            // a shared phone: the parent's saved name and number go with «خروج»
   store('albaraem_parent',null); S.parent=''; S.pl=null; S.pSub=''; ttlSub('');
   try{ history.replaceState(null,'',location.pathname); }catch(e){}
   if(S.boot && S.boot.parents) renderWelcome(); else { S.boot=null; start(); }
@@ -1782,6 +1834,9 @@ function openParent(id){
   var c=jget('albaraem_pl_'+id);
   if(c && c.d){ S.pl=c; renderParent(); } else { S.pl=null; app.innerHTML=''; }
   parentFetch(!S.pl);
+  if(!S.boot || !S.boot.pmsg || Date.now()-(S.boot.at||0)>6*3600000)   // «رسالة إلى المدرسة» and the school's phone come with the bootstrap
+    call('webBootstrap',[],function(b){ b.at=Date.now(); var had=pmOn(); S.boot=b; jput('albaraem_boot',b); if(S.view==='parent' && (had!==pmOn())) renderParent(); pobFlush(); },function(){},true);
+  else pobFlush();
 }
 function parentFetch(loud){
   var id=S.parent; if(parentFetch.on===id) return; parentFetch.on=id;   // one request per class; choosing another class is never held back by the first
@@ -1843,17 +1898,19 @@ function renderParent(){
   h+='<div class="phero"><b>'+esc(a[0])+(a[1]?' <i>'+esc(a[1])+'</i>':'')+'</b>'+
      '<span>'+esc(lLabel(d.today))+'، '+(nToday? 'نُزّل اليوم '+nToday+(nToday===1?' درس':nToday===2?' درسان':nToday<=10?' دروس':' درسًا') : (d.school?'لم تُنزَّل دروس اليوم بعد':'لا دوام اليوم'))+'</span>'+
      (nNew?'<span class="pnew">'+(nNew===1?'درس واحد جديد لم تفتحه':nNew===2?'درسان جديدان لم تفتحهما':nNew+(nNew<=10?' دروس جديدة':' درسًا جديدًا')+' لم تفتحها')+'</span>':'')+
-     '<div class="pact"><button id="pRef">تحديث</button><button id="pSwitch">تغيير الصف</button></div></div>';
+     '<div class="pact"><button id="pRef">تحديث</button><button id="pSwitch">تغيير الصف</button>'+(pmOn()?'<button id="pmOpen" class="pmgo">✉ راسِل المدرسة</button>':'')+'</div></div>';
   if(S.plErr) h+='<div class="banner">تعذّر التحديث الآن؛ هذه آخر نسخة محفوظة على الهاتف.</div>';
+  h+=pmShelfLine();
   h+='<div class="sgrid">';
   subs.slice().sort(function(x,y){ return (y.today?1:0)-(x.today?1:0) || (y.fresh?1:0)-(x.fresh?1:0) || (y.sched?1:0)-(x.sched?1:0) || (y.list.length?1:0)-(x.list.length?1:0) || x.i-y.i; }).forEach(function(s){
     var st = s.today ? '<em class="on">درس اليوم'+(s.hw?' · واجب':'')+'</em>' : s.sched ? '<em class="sc">حصة اليوم</em>' : s.list.length ? '<em>آخر درس: '+esc(lLabel(s.list[0].date))+'</em>' : '<em class="no">لا دروس بعد</em>';
     h+='<button class="stile c'+lesColor(s.name)+(s.dim?' dim':'')+(s.sched?' lit':'')+'" data-ps="'+esc(s.name)+'">'+(s.today?'<i class="rib" aria-hidden="true"></i>':'')+
       (s.fresh?'<span class="bdg" aria-label="'+s.fresh+' جديد">'+s.fresh+'</span>':'')+plIcon(s.name)+'<span class="lab"><b>'+esc(s.name)+'</b>'+st+'</span></button>'; });
-  h+='</div><div class="hint" style="text-align:center;margin-top:16px">الدفاتر الزاهية موادّ اليوم في جدول الصف، والرقم عدد الدروس الجديدة التي لم تفتحها.</div>'+installCard();
+  h+='</div><div class="hint" style="text-align:center;margin-top:16px">الدفاتر الزاهية موادّ اليوم في جدول الصف، والرقم عدد الدروس الجديدة التي لم تفتحها.</div>'+pmShelfCard()+installCard();
   app.innerHTML=h; window.scrollTo(0,S.pY||0); S.pY=0;
   document.getElementById('pRef').onclick=function(){ parentFetch(true); };
   document.getElementById('pSwitch').onclick=function(){ renderParentPick(); };
+  pmBindShelf();
   app.querySelectorAll('[data-ps]').forEach(function(b){ b.onclick=function(){ S.pY=window.scrollY; S.pSub=b.getAttribute('data-ps'); try{ history.pushState({albaraem:'psub'},''); }catch(e){} renderParentSubject(); }; });
   var di=document.getElementById('doInstall'); if(di) di.onclick=function(){ if(!deferredInstall) return; deferredInstall.prompt(); deferredInstall.userChoice.then(function(){ deferredInstall=null; renderParent(); }); };
   var hi=document.getElementById('hideInstall'); if(hi) hi.onclick=function(){ store('albaraem_install_hide','1'); renderParent(); };
@@ -1876,13 +1933,262 @@ function renderParentSubject(keepScroll){
   document.getElementById('pBack').onclick=function(){ var st=null; try{ st=history.state; }catch(e){} if(st && st.albaraem==='psub') history.back(); else renderParent(); };   // the page's own «رجوع» uses up the history step it made
   plMarkSeen(s);
 }
+// ---------------------------------------------------------------- رسالة إلى المدرسة (21-11-2026)
+/** Parents write to the school; the four people in charge read and handle the messages. Nothing here is kept on the phone except the
+ *  parent's own details (if he agrees), the queue of messages not yet sent, and the numbers of his last messages. */
+var PM_REL_OTHER='غير ذلك';
+function pmOn(){ return !!(S.boot && S.boot.pmsg); }
+function pmDigits(s){ return String(s||'').replace(/[٠-٩]/g,function(d){return String(d.charCodeAt(0)-0x660);}).replace(/[۰-۹]/g,function(d){return String(d.charCodeAt(0)-0x6F0);}); }
+function pmPhone(s){ var x=pmDigits(s).replace(/[\s\-().]/g,'').replace(/^(\+|00)?962/,'0'); if(/^7[789]\d{7}$/.test(x)) x='0'+x; return /^07[789]\d{7}$/.test(x)? x : ''; }
+function pmRef(n){ return 'م-'+n; }
+function pobGet(){ var a=jget('albaraem_pm_outbox'); return Array.isArray(a)? a : []; }
+function pobSet(a){ var s=JSON.stringify(a); store('albaraem_pm_outbox',s); return store('albaraem_pm_outbox')===s; }
+function pmSent(ref,type){ var a=jget('albaraem_pm_sent')||[]; a.unshift({ref:ref,type:type,at:Date.now()}); jput('albaraem_pm_sent',a.slice(0,10)); }
+function pmRetry(m){ return /تعذّر الاتصال|انتهت مهلة|مشغول|http/.test(m||''); }
+/** Sends what waits in the queue (quietly). A message the server refuses for its content stays, marked, for the parent to correct. */
+function pobFlush(){
+  if(pobFlush.on) return; var a=pobGet().filter(function(x){ return !x.err; }); if(!a.length) return;
+  pobFlush.on=true; var x=a[0];
+  call('webParentMsg',[x.p],function(r){
+    pobFlush.on=false; pobSet(pobGet().filter(function(y){ return y.p.id!==x.p.id; }));
+    if(r && r.ref){ pmSent(r.ref,x.p.type); if(S.view==='parent'||S.view==='psub') toast('وصلت رسالتك إلى المدرسة — رقمها '+pmRef(r.ref)); }
+    if(S.view==='parent') renderParent();
+    pobFlush();
+  },function(m){
+    pobFlush.on=false;
+    if(pmRetry(m)) return;                                       // later: when the connection or the server is back
+    var b=pobGet(); b.forEach(function(y){ if(y.p.id===x.p.id) y.err=m||'لم تُقبل الرسالة.'; }); pobSet(b);
+    if(S.view==='parent') renderParent();
+  },true);
+}
+window.addEventListener('online',function(){ if(S.parent) pobFlush(); });
+/** The line on the shelf page: waiting / refused messages. */
+function pmShelfLine(){
+  if(!pmOn()) return '';
+  var a=pobGet(), w=a.filter(function(x){return !x.err;}).length, e=a.filter(function(x){return x.err;})[0];
+  var h='';
+  if(w) h+='<div class="pmwait" role="status"><span aria-hidden="true">⏳</span> '+(w===1?'رسالة واحدة تنتظر الإرسال':w+' رسائل تنتظر الإرسال')+'؛ تُرسل حين يعود الإنترنت وأنت تفتح التطبيق.</div>';
+  if(e) h+='<div class="banner">لم تُقبل رسالتك إلى المدرسة: '+esc(e.err)+' <button class="lnk" id="pmFix">تعديلها</button></div>';
+  return h;
+}
+function pmShelfCard(){
+  if(!pmOn()) return '';
+  return '<button class="pmcard" id="pmOpen2"><span class="pmic" aria-hidden="true">'+PM_ENV+'</span><span><b>عندك سؤال أو طلب؟</b><small>اكتب رسالة إلى إدارة المدرسة</small></span><i aria-hidden="true">‹</i></button>';
+}
+var PM_ENV='<svg viewBox="0 0 48 36"><rect x="2" y="3" width="44" height="30" rx="3" fill="#fffdf6" stroke="#b8862b" stroke-width="2"/><path d="M3 5l21 16L45 5" fill="none" stroke="#b8862b" stroke-width="2" stroke-linejoin="round"/><circle cx="24" cy="22" r="5" fill="#1f5e3b"/></svg>';
+function pmBindShelf(){
+  ['pmOpen','pmOpen2'].forEach(function(k){ var b=document.getElementById(k); if(b) b.onclick=function(){ pmOpenForm(); }; });
+  var f=document.getElementById('pmFix'); if(f) f.onclick=function(){ var a=pobGet(), e=a.filter(function(x){return x.err;})[0]; if(!e) return; pobSet(a.filter(function(x){ return x!==e && x.p.id!==e.p.id; })); pmOpenForm(e.p, e.err); };
+}
+
+function pmOpenForm(p, err, here){
+  var me=jget('albaraem_pm_me')||{};
+  S.pmf={ id:(p&&p.id)||'', type:(p&&p.type)||'', detail:(p&&p.detail)||'', text:(p&&p.text)||'', student:(p&&p.student)||me.student||'', pname:(p&&p.pname)||me.pname||'',
+    rel:(p&&p.rel)||me.rel||'', relOther:(p&&p.relOther)||me.relOther||'', phone:(p&&p.phone)||me.phone||'', secret:!!(p&&p.secret), keep:me.keep!==false, ok:!!p, dateMode:'' };
+  if(!here){ S.pY=window.scrollY; try{ history.pushState({albaraem:'psub'},''); }catch(e){} }
+  renderPmForm(err);
+}
+function pmChips(name,list,val,label){
+  return '<div class="chips pmch" role="radiogroup" aria-label="'+esc(label)+'">'+list.map(function(x){ return '<button type="button" class="chip'+(x===val?' on':'')+'" role="radio" aria-checked="'+(x===val)+'" data-'+name+'="'+esc(x)+'">'+esc(x)+'</button>'; }).join('')+'</div>';
+}
+function pmTomorrow(iso){ var d=new Date(iso+'T12:00:00'); d.setDate(d.getDate()+1); var p=function(n){return (n<10?'0':'')+n;}; return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+function renderPmForm(err){
+  S.view='pmform'; var f=S.pmf, I=S.boot.pmsg, d=S.pl&&S.pl.d, need=I.detailFor[f.type]||'';
+  var a=String((d&&d.label)||'').split(' — ');
+  var h='<button class="pback" id="pmBack">› الدفاتر</button><div class="letter" id="pmLetter"><div class="lhead"><span class="pmic" aria-hidden="true">'+PM_ENV+'</span><div><b>رسالة إلى المدرسة</b><small>'+esc(a.join('، '))+'</small></div></div><div class="lbody">';
+  if(err) h+='<div class="banner" role="alert">'+esc(err)+'</div>';
+  h+='<label class="f" id="lbType">نوع الرسالة</label>'+pmChips('pt',I.types,f.type,'نوع الرسالة')+'<div class="ferr" id="eType"></div>';
+  if(need==='التاريخ'){
+    var td=(d&&d.today)||localIso(), tm=pmTomorrow(td), mode=f.dateMode || (f.detail===td?'اليوم':f.detail===tm?'غدًا':f.detail?'تاريخ آخر':'');
+    h+='<label class="f">التاريخ</label>'+pmChips('pdm',['اليوم','غدًا','تاريخ آخر'],mode,'التاريخ')+(mode==='تاريخ آخر'?'<input type="date" id="pmDate" value="'+esc(f.detail)+'" style="margin-top:8px">':'')+'<div class="ferr" id="eDetail"></div>';
+  } else if(need==='المادة'){
+    h+='<label class="f">المادة</label>'+pmChips('pd',((d&&d.subjects)||[]).slice(0,30),f.detail,'المادة')+'<div class="ferr" id="eDetail"></div>';
+  } else if(need){
+    h+='<label class="f">تتعلق الشكوى بـ</label>'+pmChips('pd',I.about,f.detail,'تتعلق الشكوى بـ')+'<div class="ferr" id="eDetail"></div>';
+  }
+  var ph={'غياب أو استئذان':'اذكر السبب، وإن كان استئذانًا فاذكر وقت الانصراف.','ملاحظة على درس':'اذكر الدرس وملاحظتك عليه.','شكوى':'اذكر ما حدث ومتى.','شكر':'اكتب كلمتك، وإن كانت لمعلم/ة فاذكر اسمه.'}[f.type]||'اكتب رسالتك هنا.';
+  h+='<label class="f" for="pmText">الرسالة</label><textarea id="pmText" class="pmta" maxlength="'+I.max.text+'" placeholder="'+esc(ph)+'">'+esc(f.text)+'</textarea><div class="pmcount" id="pmCount" aria-live="polite"></div><div class="ferr" id="eText"></div>';
+  if(f.type==='شكوى'||f.type==='ملاحظة على درس') h+='<label class="pmck"><input type="checkbox" id="pmSecret"'+(f.secret?' checked':'')+'> أرجو ألا يُذكر اسمي للطرف المعنيّ</label>';
+  h+='<div class="pmsep"></div>'+
+    '<label class="f" for="pmStudent">اسم الطالب/الطالبة</label><input type="text" id="pmStudent" maxlength="'+I.max.name+'" autocomplete="off" value="'+esc(f.student)+'"><div class="ferr" id="eStudent"></div>'+
+    '<label class="f" for="pmName">اسمك</label><input type="text" id="pmName" maxlength="'+I.max.name+'" autocomplete="name" value="'+esc(f.pname)+'"><div class="ferr" id="eName"></div>'+
+    '<label class="f">صلتك بالطالب/الطالبة</label>'+pmChips('pr',I.rels,f.rel,'صلتك بالطالب')+
+    (f.rel===PM_REL_OTHER?'<input type="text" id="pmRelO" maxlength="30" placeholder="مثل: الجد، الخالة" value="'+esc(f.relOther)+'" style="margin-top:8px">':'')+'<div class="ferr" id="eRel"></div>'+
+    '<label class="f" for="pmPhone">رقم هاتفك للتواصل</label><input type="tel" id="pmPhone" inputmode="tel" autocomplete="tel" dir="ltr" maxlength="20" placeholder="07XXXXXXXX" value="'+esc(f.phone)+'"><div class="ferr" id="ePhone"></div>'+
+    '<label class="pmck"><input type="checkbox" id="pmKeep"'+(f.keep?' checked':'')+'> احفظ اسمي ورقمي واسم الطالب على هذا الهاتف</label>'+
+    '<div class="pmnote">تصل رسالتك إلى إدارة المدرسة وحدها، ويُستخدم رقمك للتواصل معك بشأنها فقط.</div>'+
+    '<label class="pmck"><input type="checkbox" id="pmOk"'+(f.ok?' checked':'')+'> أوافق على ذلك</label><div class="ferr" id="eOk"></div>'+
+    '<input type="text" id="pmHp" tabindex="-1" autocomplete="off" aria-hidden="true" class="pmhp">'+
+    '<button class="btn block" id="pmSend">أرسل الرسالة</button></div></div>';
+  app.innerHTML=h; window.scrollTo(0,0);
+  function rd(){ var g=function(i){ var e=document.getElementById(i); return e? e.value : null; };
+    if(g('pmText')!==null) f.text=g('pmText'); f.student=g('pmStudent'); f.pname=g('pmName'); f.phone=g('pmPhone');
+    if(g('pmRelO')!==null) f.relOther=g('pmRelO'); if(g('pmDate')!==null) f.detail=g('pmDate');
+    var s=document.getElementById('pmSecret'); f.secret=!!(s&&s.checked); f.keep=document.getElementById('pmKeep').checked; f.ok=document.getElementById('pmOk').checked; }
+  function cnt(){ var n=I.max.text-(document.getElementById('pmText').value||'').length, c=document.getElementById('pmCount'); c.textContent=n<200?'بقي '+n+' حرفًا':''; c.className='pmcount'+(n<50?' low':''); }
+  cnt();
+  document.getElementById('pmText').oninput=function(){ cnt(); S.pmDirty=true; var e=document.getElementById('eText'); if(e) e.textContent=''; };
+  app.querySelectorAll('input').forEach(function(e){ if(e.id!=='pmText') e.addEventListener('input',function(){ S.pmDirty=true; }); });
+  function pick(attr,fn){ app.querySelectorAll('[data-'+attr+']').forEach(function(b){ b.onclick=function(){ rd(); fn(b.getAttribute('data-'+attr)); var y=window.scrollY; renderPmForm(); window.scrollTo(0,y); }; }); }
+  pick('pt',function(v){ if(f.type!==v){ f.type=v; f.detail=''; f.dateMode=''; } S.pmDirty=true; });
+  pick('pd',function(v){ f.detail=v; });
+  pick('pr',function(v){ f.rel=v; });
+  pick('pdm',function(v){ var td=(d&&d.today)||localIso(); f.dateMode=v; f.detail = v==='اليوم'? td : v==='غدًا'? pmTomorrow(td) : (f.detail&&f.detail!==td&&f.detail!==pmTomorrow(td)?f.detail:''); });
+  document.getElementById('pmPhone').onblur=function(){ var x=pmPhone(this.value); if(x) this.value=x; document.getElementById('ePhone').textContent = (!this.value.trim()||x)? '' : 'اكتب رقم الهاتف المحمول كاملًا: عشرة أرقام تبدأ بـ 07، مثل 0791234567.'; };
+  document.getElementById('pmBack').onclick=function(){ rd(); pmLeave(); };
+  document.getElementById('pmSend').onclick=function(){ rd(); pmSubmit(); };
+}
+function pmLeave(){
+  if(S.pmDirty && String(S.pmf.text||'').trim() && !confirm('لم تُرسل رسالتك بعد. هل تريد تركها؟')) return;
+  S.pmDirty=false; var st=null; try{ st=history.state; }catch(e){} if(st && st.albaraem==='psub') history.back(); else renderParent();
+}
+function pmCheck(){
+  var f=S.pmf, I=S.boot.pmsg, need=I.detailFor[f.type]||'', e={};
+  if(!f.type) e.eType='اختر نوع الرسالة.';
+  if(need && !String(f.detail||'').trim()) e.eDetail = need==='التاريخ'?'اختر التاريخ.':need==='المادة'?'اختر المادة.':'اختر ما تتعلق به الشكوى.';
+  var tx=String(f.text||'').trim(); if(!tx) e.eText='اكتب رسالتك.'; else if(tx.length<I.max.textMin) e.eText='اكتب رسالتك بتفصيل أكثر قليلًا.';
+  if(!String(f.student||'').trim()) e.eStudent='اكتب اسم الطالب/الطالبة.';
+  if(!String(f.pname||'').trim()) e.eName='اكتب اسمك.';
+  if(!f.rel) e.eRel='اختر صلتك بالطالب/الطالبة.';
+  if(!String(f.phone||'').trim()) e.ePhone='اكتب رقم هاتفك لتتصل بك المدرسة.'; else if(!pmPhone(f.phone)) e.ePhone='اكتب رقم الهاتف المحمول كاملًا: عشرة أرقام تبدأ بـ 07، مثل 0791234567.';
+  if(!f.ok) e.eOk='ضع علامة «أوافق» لإرسال الرسالة.';
+  return e;
+}
+function pmSubmit(){
+  if(pmSubmit.on) return;
+  var f=S.pmf, e=pmCheck(), first='';
+  Object.keys(e).forEach(function(k){ var x=document.getElementById(k); if(x){ x.textContent=e[k]; if(!first) first=k; } });
+  app.querySelectorAll('.ferr').forEach(function(x){ if(!e[x.id]) x.textContent=''; });
+  if(first){ var el=document.getElementById(first); var inp=el && el.previousElementSibling; if(inp && inp.focus && /INPUT|TEXTAREA/.test(inp.tagName)) inp.focus(); el.scrollIntoView({block:'center'}); return; }
+  if(f.keep) jput('albaraem_pm_me',{pname:f.pname.trim(),rel:f.rel,relOther:f.relOther,student:f.student.trim(),phone:pmPhone(f.phone),keep:true}); else store('albaraem_pm_me',JSON.stringify({keep:false}));
+  if(!f.id) f.id='P'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+  var p={id:f.id,cls:S.parent,pname:f.pname.trim(),rel:f.rel,relOther:f.rel===PM_REL_OTHER?String(f.relOther||'').trim():'',student:f.student.trim(),type:f.type,
+    detail:String(f.detail||'').trim(),text:String(f.text).trim(),phone:pmPhone(f.phone),secret:!!f.secret,hp:document.getElementById('pmHp').value};
+  var a=pobGet().filter(function(x){ return x.p.id!==p.id; }); a.push({p:p,at:Date.now()}); var kept=pobSet(a);
+  pmSubmit.on=true; var btn=document.getElementById('pmSend'); btn.disabled=true; btn.textContent='جارٍ الإرسال…';
+  call('webParentMsg',[p],function(r){
+    pmSubmit.on=false; S.pmDirty=false; pobSet(pobGet().filter(function(x){ return x.p.id!==p.id; }));
+    if(r && r.ref) pmSent(r.ref,p.type);
+    renderPmDone(r&&r.ref, p);
+  },function(m){
+    pmSubmit.on=false;
+    if(pmRetry(m) && kept){ S.pmDirty=false; renderPmDone(0, p); return; }        // kept on the phone: sent later
+    if(!pmRetry(m)) pobSet(pobGet().filter(function(x){ return x.p.id!==p.id; }));
+    var b=document.getElementById('pmSend'); if(b){ b.disabled=false; b.textContent='أرسل الرسالة'; }
+    status('err', m||'تعذّر الإرسال. حاول مرة أخرى.');
+  },true);
+}
+function renderPmDone(ref,p){
+  var I=S.boot.pmsg, L=document.getElementById('pmLetter');
+  function draw(){
+    S.view='pmdone';
+    var h='<div class="pmdone'+(ref?' sent':' wait')+'"><div class="pmseal" aria-hidden="true">'+(ref?PM_ENV:'<span class="pmclock">⏳</span>')+'</div>'+
+      '<h2 tabindex="-1" id="pmH">'+(ref?'وصلت رسالتك إلى إدارة المدرسة':'حُفظت رسالتك على هذا الهاتف')+'</h2>';
+    if(ref) h+='<div class="pmticket"><small>رقم رسالتك</small><b>'+esc(pmRef(ref))+'</b></div><p>'+esc(I.promise)+' سيكون الاتصال على الرقم <span dir="ltr">'+esc(p.phone)+'</span>.</p><p class="pmsmall">اذكر رقم الرسالة عند التواصل مع المدرسة.</p>';
+    else h+='<p>لم تصل إلى المدرسة بعد. ستُرسل تلقائيًا حين يعود الإنترنت وأنت تفتح التطبيق، ويظهر لك رقمها عندئذ.</p>';
+    if(I.phone) h+='<p class="pmsmall">للأمر العاجل اتصل بالمدرسة: <a href="tel:'+esc(I.phone.replace(/[^\d+]/g,''))+'" dir="ltr">'+esc(I.phone)+'</a></p>';
+    h+='<button class="btn block" id="pmHome">العودة إلى الدفاتر</button><button class="btn ghost block" id="pmMore">رسالة أخرى</button></div>';
+    app.innerHTML=h; window.scrollTo(0,0);
+    try{ document.getElementById('pmH').focus({preventScroll:true}); }catch(e){}
+    try{ history.replaceState({albaraem:'psub'},''); }catch(e){}
+    document.getElementById('pmHome').onclick=function(){ pmLeave(); };
+    document.getElementById('pmMore').onclick=function(){ pmOpenForm(null,'',true); };
+  }
+  var moving = ref && L && window.matchMedia && window.matchMedia('(prefers-reduced-motion:no-preference)').matches;
+  if(moving){ L.classList.add('fold'); setTimeout(draw,300); } else draw();
+}
+
+// ---- the people in charge: count on the home page, inbox, one message
+function pmHomeCard(){
+  var a=S.home&&S.home.adm; if(!a||!a.pmsg) return '';
+  var n=S.home.pm? S.home.pm.n : null;
+  return '<div class="card pmhome"><h2><span class="pmic" aria-hidden="true">'+PM_ENV+'</span><span class="grow">رسائل الأهالي</span>'+(n?'<span class="pmbdg" aria-label="'+n+' جديدة">'+n+'</span>':'')+'</h2>'+
+    '<div class="hint" style="margin-top:0">'+(n===null?'':n? (n===1?'رسالة واحدة جديدة لم يتسلّمها أحد بعد.':n===2?'رسالتان جديدتان لم يتسلّمهما أحد بعد.':n+(n<=10?' رسائل جديدة':' رسالة جديدة')+' لم يتسلّمها أحد بعد.') : 'لا رسائل جديدة.')+'</div>'+
+    '<button class="btn block" id="pmBox" style="margin-top:10px">فتح الرسائل</button></div>';
+}
+function bindPmHome(){ var b=document.getElementById('pmBox'); if(b) b.onclick=function(){ openPmBox(); }; }
+function openPmBox(){
+  call('webPmList',[S.teacher,S.pin],function(d){ S.pm=d; S.pm.tab=S.pm.tab||'جديدة'; S.pm.type=''; S.pm.cls=''; pmSyncCount(); renderPmBox(); });
+}
+function pmSyncCount(){ if(!S.pm||!S.home) return; var n=S.pm.list.filter(function(x){ return x.status==='جديدة'; }).length; S.home.pm={n:n}; if(S.homes[hkey()]) S.homes[hkey()].pm={n:n}; }
+function pmAge(at){
+  var d=String(at||'').slice(0,10); if(!/^\d{4}-\d\d-\d\d$/.test(d)) return {t:'',late:false};
+  var n=Math.round((new Date(localIso()+'T12:00:00')-new Date(d+'T12:00:00'))/86400000);
+  return {t: n<=0?'اليوم':n===1?'أمس':n===2?'منذ يومين':'منذ '+n+(n<=10?' أيام':' يومًا'), n:n};
+}
+function renderPmBox(){
+  who(); S.view='pmbox'; document.getElementById('savebar').style.display='none';
+  var d=S.pm, by={}; d.statuses.forEach(function(s){ by[s]=0; }); d.list.forEach(function(x){ by[x.status]=(by[x.status]||0)+1; });
+  var cls=[]; d.list.forEach(function(x){ if(cls.indexOf(x.cls)<0) cls.push(x.cls); });
+  var h='<div class="ltop"><b>رسائل الأهالي</b><span>وعدنا الأهل بالتواصل خلال ثلاثة أيام دوام.</span></div>'+
+    '<div class="tabs pmtabs">'+d.statuses.map(function(s){ return '<button class="tab'+(d.tab===s?' on':'')+'" data-pmt="'+esc(s)+'">'+esc(s)+(s!=='تمت'?' <span class="n">'+(by[s]||0)+'</span>':'')+'</button>'; }).join('')+'</div>'+
+    '<div class="pmfilt"><select id="pmType"><option value="">كل الأنواع</option>'+d.types.map(function(t){ return '<option'+(d.type===t?' selected':'')+'>'+esc(t)+'</option>'; }).join('')+'</select>'+
+    '<select id="pmCls"><option value="">كل الصفوف</option>'+cls.map(function(c){ return '<option'+(d.cls===c?' selected':'')+'>'+esc(c)+'</option>'; }).join('')+'</select></div>';
+  var L=d.list.filter(function(x){ return x.status===d.tab && (!d.type||x.type===d.type) && (!d.cls||x.cls===d.cls); });
+  if(d.tab!=='تمت') L=L.slice().reverse();                      // a queue: the oldest first
+  if(!L.length) h+='<div class="lnone">'+(d.tab==='جديدة'?'لا رسائل جديدة.':d.tab==='قيد المتابعة'?'لا رسائل قيد المتابعة.':'لا رسائل في «تمت».')+'</div>';
+  h+='<div class="pmlist">'+L.map(function(x){ var g=pmAge(x.at), late=x.status!=='تمت' && g.n>=3;
+    return '<button class="pmrow'+(late?' late':'')+(x.type==='شكوى'?' cmp':'')+'" data-pmo="'+esc(x.id)+'"><div class="pmr1"><b>'+esc(x.type)+'</b>'+(x.detail?'<span>'+esc(x.detail)+'</span>':'')+'<em>'+esc(g.t)+(late?' · متأخرة':'')+'</em></div>'+
+      '<div class="pmr2">'+esc(x.pname)+' · '+esc(x.student)+' · '+esc(x.cls)+'</div><div class="pmr3">'+esc(String(x.text).slice(0,110))+(String(x.text).length>110?'…':'')+'</div>'+
+      '<div class="pmr4"><span>'+esc(pmRef(x.ref))+'</span>'+(x.owner?'<span>المسؤول: '+esc(x.owner)+'</span>':'<span class="none">بلا مسؤول</span>')+'</div></button>'; }).join('')+'</div>'+
+    '<button class="btn ghost block" id="pmReload">تحديث</button><button class="btn ghost block" id="back">رجوع</button>';
+  app.innerHTML=h;
+  app.querySelectorAll('[data-pmt]').forEach(function(b){ b.onclick=function(){ d.tab=b.getAttribute('data-pmt'); renderPmBox(); }; });
+  document.getElementById('pmType').onchange=function(){ d.type=this.value; renderPmBox(); };
+  document.getElementById('pmCls').onchange=function(){ d.cls=this.value; renderPmBox(); };
+  app.querySelectorAll('[data-pmo]').forEach(function(b){ b.onclick=function(){ S.pmY=window.scrollY; openPmOne(b.getAttribute('data-pmo')); }; });
+  document.getElementById('pmReload').onclick=function(){ var t=d.tab; call('webPmList',[S.teacher,S.pin],function(x){ S.pm=x; S.pm.tab=t; S.pm.type=d.type; S.pm.cls=d.cls; pmSyncCount(); renderPmBox(); }); };
+  document.getElementById('back').onclick=function(){ goHome(); };
+  window.scrollTo(0,S.pmY||0); S.pmY=0;
+}
+function openPmOne(id){ var x=S.pm.list.filter(function(y){ return y.id===id; })[0]; if(!x) return; S.pmo={x:x, cur:{status:x.status,owner:x.owner,result:x.result,note:x.note}}; renderPmOne(); }
+function renderPmOne(){
+  who(); S.view='pmone'; window.scrollTo(0,0);
+  var o=S.pmo, x=o.x, c=o.cur, g=pmAge(x.at), wa='962'+String(x.phone).slice(1);
+  var h='<div class="ltop"><b>'+esc(pmRef(x.ref))+'</b><span>'+esc(x.type)+(x.detail?' — '+esc(x.detail):'')+' · '+esc(x.at)+' ('+esc(g.t)+')</span></div>'+
+    '<div class="card pmmsg">'+(x.secret?'<div class="banner" style="margin:0 0 10px">طلب ولي الأمر ألا يُذكر اسمه للطرف المعنيّ.</div>':'')+
+    '<div class="pmtext">'+lNl(x.text)+'</div><div class="pmwho"><b>'+esc(x.pname)+'</b> ('+esc(x.rel)+') · الطالب/ة: '+esc(x.student)+' · '+esc(x.cls)+'</div>'+
+    '<div class="pmcall"><a class="btn" href="tel:'+esc(x.phone)+'">اتصال <span dir="ltr">'+esc(x.phone)+'</span></a><a class="btn ghost" href="https://wa.me/'+esc(wa)+'" target="_blank" rel="noopener">واتساب</a></div>'+
+    '<div class="hint">الرسالة لم يُتحقق من مرسلها بعد؛ اتصل بالرقم قبل أي إجراء.</div></div>'+
+    '<div class="card"><h2>المتابعة</h2>'+(c.status==='جديدة'?'<button class="btn block" id="pmTake" style="margin-top:0">سأتابعها</button>':'')+
+    '<label class="f">الحالة</label>'+pmChips('pms',S.pm.statuses,c.status,'الحالة')+
+    '<label class="f" for="pmOwner">المسؤول</label><select id="pmOwner"><option value="">— لم يُحدَّد —</option>'+S.pm.owners.concat(c.owner && S.pm.owners.indexOf(c.owner)<0?[c.owner]:[]).map(function(n){ return '<option'+(n===c.owner?' selected':'')+'>'+esc(n)+'</option>'; }).join('')+'</select>'+
+    '<label class="f" for="pmRes">النتيجة <small>(ماذا تم، ومتى أُبلغ ولي الأمر — مطلوبة لـ«تمت»)</small></label><textarea id="pmRes" class="pmta sm" maxlength="600">'+esc(c.result)+'</textarea>'+
+    '<label class="f" for="pmNote">ملاحظة داخلية <small>(لا يراها ولي الأمر)</small></label><textarea id="pmNote" class="pmta sm" maxlength="1000">'+esc(c.note)+'</textarea>'+
+    (x.edited?'<div class="hint">آخر تعديل: '+esc(x.edited)+'</div>':'')+'</div>'+
+    '<button class="btn ghost block" id="back">› الرسائل</button>';
+  app.innerHTML=h;
+  var bar=document.getElementById('savebar'); bar.style.display='block'; document.getElementById('saveBtn').style.display=''; document.getElementById('saveBtn').textContent='حفظ';
+  function ch(){ c.owner=document.getElementById('pmOwner').value; c.result=document.getElementById('pmRes').value; c.note=document.getElementById('pmNote').value;
+    setDirty(c.status!==x.status||c.owner!==x.owner||c.result!==x.result||c.note!==x.note); }
+  setDirty(c.status!==x.status||c.owner!==x.owner||c.result!==x.result||c.note!==x.note);
+  ['pmOwner','pmRes','pmNote'].forEach(function(k){ document.getElementById(k).addEventListener(k==='pmOwner'?'change':'input',ch); });
+  app.querySelectorAll('[data-pms]').forEach(function(b){ b.onclick=function(){ ch(); c.status=b.getAttribute('data-pms'); if(c.status!=='جديدة' && !c.owner) c.owner=S.teacher; var y=window.scrollY; renderPmOne(); window.scrollTo(0,y); }; });
+  var tk=document.getElementById('pmTake'); if(tk) tk.onclick=function(){ ch(); c.status='قيد المتابعة'; if(!c.owner) c.owner=S.teacher; savePm(); };
+  document.getElementById('back').onclick=function(){ leave(renderPmBox); };
+}
+function savePm(){
+  var o=S.pmo, x=o.x, c=o.cur, chg={}, was={};
+  ['status','owner','result','note'].forEach(function(k){ if(c[k]!==x[k]){ chg[k]=c[k]; was[k]=x[k]; } });
+  if(!Object.keys(chg).length){ setDirty(false); return; }
+  if(c.status==='تمت' && !String(c.result||'').trim()){ status('err','اكتب النتيجة (ماذا تم، ومتى أُبلغ ولي الأمر) قبل وضع الرسالة في «تمت».'); var r=document.getElementById('pmRes'); if(r) r.focus(); return; }
+  call('webPmSave',[S.teacher,S.pin,x.id,chg,was],function(r){
+    if(r && r.conflict){ S.pm.list=S.pm.list.map(function(y){ return y.id===x.id? r.item : y; }); S.pmo={x:r.item,cur:{status:r.item.status,owner:r.item.owner,result:r.item.result,note:r.item.note}}; pmSyncCount(); renderPmOne();
+      status('err','عدّل غيرك هذه الرسالة قبل قليل؛ هذه آخر نسخة منها. أعد تغييرك إن كان ما زال لازمًا.'); return; }
+    S.pm.list=S.pm.list.map(function(y){ return y.id===x.id? r.item : y; }); pmSyncCount();
+    S.pmo={x:r.item,cur:{status:r.item.status,owner:r.item.owner,result:r.item.result,note:r.item.note}};
+    setDirty(false); renderPmOne(); toast(r.item.status==='تمت'?'أُغلقت الرسالة ✓':'حُفظ ✓');
+  });
+}
+
 document.addEventListener('visibilitychange',function(){
   if(document.visibilityState!=='visible') return;
+  if(S.parent && S.view!=='login') pobFlush();
   if((S.view==='parent'||S.view==='psub') && S.pl && Date.now()-(S.pl.at||0)>60000) parentFetch(false);
   if(S.view==='lessons' && S.pin && Date.now()-(lesRefresh.at||0)>60000) lesRefresh();
 });
 
-document.getElementById('saveBtn').onclick=function(){ if(busy>0) return; if(S.view==='lesson') saveLesson(); else if(S.view==='visit') saveVisit(); else if(S.view==='tasks') saveTasks(); else if(S.view==='tg') saveTg(); else if(S.view==='fam') saveFam(); else if(S.view==='meet') saveMeet(); else saveClass(); };
+document.getElementById('saveBtn').onclick=function(){ if(busy>0) return; if(S.view==='lesson') saveLesson(); else if(S.view==='visit') saveVisit(); else if(S.view==='tasks') saveTasks(); else if(S.view==='tg') saveTg(); else if(S.view==='fam') saveFam(); else if(S.view==='meet') saveMeet(); else if(S.view==='pmone') savePm(); else saveClass(); };
 start();
 </script>
 <script>if('serviceWorker' in navigator){(function(){var had=!!navigator.serviceWorker.controller,once=false;navigator.serviceWorker.addEventListener('controllerchange',function(){ if(!had||once) return; once=true; try{ if(typeof appIdle==='function' && appIdle()) location.reload(); }catch(e){} });addEventListener('load',function(){navigator.serviceWorker.register('sw.js');});})();}</script>
